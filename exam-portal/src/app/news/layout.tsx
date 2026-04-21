@@ -10,14 +10,10 @@ export const metadata: Metadata = {
     "Latest Indian finance, business, markets, economy and startup news.",
   openGraph: { siteName: "Rizz Jobs", locale: "en_IN", type: "website" },
 };
-import dynamic from "next/dynamic";
 import BreakingNewsBanner from "@/components/BreakingNewsBanner";
 import HeadlineTicker from "@/components/HeadlineTicker";
 import BackToTop from "@/components/BackToTop";
-
-const MarketTicker    = dynamic(() => import("@/components/MarketTicker"),    { ssr: false });
-const FiiDiiBar       = dynamic(() => import("@/components/FiiDiiBar"),       { ssr: false });
-const CryptoTicker    = dynamic(() => import("@/components/CryptoTicker"),    { ssr: false });
+import NewsClientTickers from "@/components/NewsClientTickers";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -61,9 +57,7 @@ export default function NewsLayout({ children }: { children: React.ReactNode }) 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />
       <BreakingNewsBanner />
-      <MarketTicker />
-      <FiiDiiBar />
-      <CryptoTicker />
+      <NewsClientTickers />
       <HeadlineTicker />
       {children}
       <BackToTop />
