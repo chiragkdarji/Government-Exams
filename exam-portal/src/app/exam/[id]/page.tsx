@@ -933,6 +933,20 @@ export default async function ExamDetail({
           </div>
         </div>
       </main>
+
+      {/* Sticky "Apply Now" bar — mobile only, above 56px bottom nav */}
+      {exam.link && (
+        <div className="fixed bottom-14 left-0 right-0 p-3 bg-[#030712]/95 backdrop-blur-md border-t border-white/10 md:hidden z-40">
+          <a
+            href={getSafeOfficialUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full py-3 text-center text-sm font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
+          >
+            Apply Now →
+          </a>
+        </div>
+      )}
     </div>
   );
 }

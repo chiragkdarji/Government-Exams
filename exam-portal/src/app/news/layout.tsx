@@ -1,12 +1,12 @@
 import { Playfair_Display, IBM_Plex_Sans } from "next/font/google";
-import NewsHeader from "@/components/NewsHeader";
-import NewsFooter from "@/components/NewsFooter";
-import MarketTicker from "@/components/MarketTicker";
+import dynamic from "next/dynamic";
 import BreakingNewsBanner from "@/components/BreakingNewsBanner";
-import FiiDiiBar from "@/components/FiiDiiBar";
-import CryptoTicker from "@/components/CryptoTicker";
 import HeadlineTicker from "@/components/HeadlineTicker";
 import BackToTop from "@/components/BackToTop";
+
+const MarketTicker    = dynamic(() => import("@/components/MarketTicker"),    { ssr: false });
+const FiiDiiBar       = dynamic(() => import("@/components/FiiDiiBar"),       { ssr: false });
+const CryptoTicker    = dynamic(() => import("@/components/CryptoTicker"),    { ssr: false });
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -35,10 +35,10 @@ const orgSchema = {
     height: 512,
   },
   foundingDate: "2024",
-  publishingPrinciples: "https://rizzjobs.in/news/about",
-  masthead: "https://rizzjobs.in/news/about",
-  actionableFeedbackPolicy: "https://rizzjobs.in/news/contact",
-  correctionsPolicy: "https://rizzjobs.in/news/disclaimer",
+  publishingPrinciples: "https://rizzjobs.in/about",
+  masthead: "https://rizzjobs.in/about",
+  actionableFeedbackPolicy: "https://rizzjobs.in/contact",
+  correctionsPolicy: "https://rizzjobs.in/disclaimer",
   sameAs: ["https://rizzjobs.in"],
 };
 
@@ -53,10 +53,8 @@ export default function NewsLayout({ children }: { children: React.ReactNode }) 
       <MarketTicker />
       <FiiDiiBar />
       <CryptoTicker />
-      <NewsHeader />
       <HeadlineTicker />
       {children}
-      <NewsFooter />
       <BackToTop />
     </div>
   );

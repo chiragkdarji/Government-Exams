@@ -1,20 +1,27 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Header from "./Header";
-import Footer from "./Footer";
+import SiteHeader from "./SiteHeader";
+import SiteFooter from "./SiteFooter";
+import BottomNav from "./BottomNav";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdmin = pathname?.startsWith("/admin");
-  const isNews  = pathname?.startsWith("/news");
-  const isIpl   = pathname?.startsWith("/ipl");
+  const isAdmin  = pathname?.startsWith("/admin");
+
+  if (isAdmin) {
+    return <>{children}</>;
+  }
 
   return (
     <>
-      {!isAdmin && !isNews && !isIpl && <Header />}
-      {children}
-      {!isAdmin && !isNews && !isIpl && <Footer />}
+      <SiteHeader />
+      {/* pb-14 reserves space for the 56px bottom nav on mobile */}
+      <div className="pb-14 md:pb-0">
+        {children}
+      </div>
+      <SiteFooter />
+      <BottomNav />
     </>
   );
 }

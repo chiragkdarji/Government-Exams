@@ -1,5 +1,4 @@
 import { Rajdhani, Inter } from "next/font/google";
-import CricketHeader from "@/components/cricket/CricketHeader";
 
 const rajdhani = Rajdhani({
   subsets: ["latin"],
@@ -21,7 +20,6 @@ export default function CricketLayout({ children }: { children: React.ReactNode 
       className={`${rajdhani.variable} ${inter.variable} min-h-screen`}
       style={{ background: "#0A0A0F", color: "#F0EDE8" }}
     >
-      <CricketHeader />
       <main>{children}</main>
     </div>
   );
