@@ -5,76 +5,90 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-export const revalidate = 3600; // Regenerate every hour
+export const revalidate = 3600;
+
+const IPL_TEAM_SLUGS = [
+  "mumbai-indians",
+  "chennai-super-kings",
+  "royal-challengers-bengaluru",
+  "kolkata-knight-riders",
+  "sunrisers-hyderabad",
+  "delhi-capitals",
+  "punjab-kings",
+  "rajasthan-royals",
+  "lucknow-super-giants",
+  "gujarat-titans",
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://rizzjobs.in";
 
-  // Fetch all notifications
+  // --- Exam / Jobs section ---
   let notificationUrls: MetadataRoute.Sitemap = [];
   try {
-    const { data } = await supabase.from("notifications").select("id, slug, created_at, updated_at");
+    const { data } = await supabase
+      .from("notifications")
+      .select("id, slug, created_at, updated_at");
     if (data) {
       notificationUrls = data.map((n) => ({
         url: `${baseUrl}/exam/${n.slug || n.id}`,
         lastModified: new Date(n.updated_at || n.created_at),
-        changeFrequency: "daily" as const,
-        priority: 0.8,
       }));
     }
   } catch (error) {
     console.error("Error fetching notifications for sitemap:", error);
   }
 
-  // Fetch active category slugs from DB
   let categoryUrls: MetadataRoute.Sitemap = [];
   try {
     const { data } = await supabase
       .from("categories")
-      .select("slug")
+      .select("slug, updated_at")
       .eq("is_active", true)
       .order("sort_order");
     if (data) {
       categoryUrls = data.map((c) => ({
         url: `${baseUrl}/jobs/${c.slug}`,
-        lastModified: new Date(),
-        changeFrequency: "daily" as const,
-        priority: 0.7,
+        lastModified: new Date(c.updated_at || Date.now()),
       }));
     }
   } catch (error) {
     console.error("Error fetching categories for sitemap:", error);
   }
 
-  // Cricket + IPL static pages
+  // --- Cricket / IPL section ---
   const cricketStaticUrls: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/cricket`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.9 },
-    { url: `${baseUrl}/cricket/live`, lastModified: new Date(), changeFrequency: "always", priority: 0.9 },
-    { url: `${baseUrl}/cricket/upcoming`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/cricket/rankings`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
-    { url: `${baseUrl}/cricket/records`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/cricket/news`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/cricket/ipl`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.9 },
-    { url: `${baseUrl}/cricket/ipl/schedule`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/cricket/ipl/points-table`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/cricket/ipl/orange-cap`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
-    { url: `${baseUrl}/cricket/ipl/purple-cap`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
-    { url: `${baseUrl}/cricket/ipl/teams`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/cricket/ipl/news`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/cricket/ipl/stats`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
+    { url: `${baseUrl}/cricket`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/live`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/upcoming`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/rankings`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/records`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/news`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/ipl`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/ipl/schedule`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/ipl/points-table`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/ipl/orange-cap`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/ipl/purple-cap`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/ipl/teams`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/ipl/news`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/ipl/stats`, lastModified: new Date() },
+    { url: `${baseUrl}/cricket/ipl/fantasy`, lastModified: new Date() },
+    ...IPL_TEAM_SLUGS.map((slug) => ({
+      url: `${baseUrl}/cricket/ipl/teams/${slug}`,
+      lastModified: new Date(),
+    })),
   ];
 
-  // Static news section pages
+  // --- News section ---
   const newsStaticUrls: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/news`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.9 },
-    { url: `${baseUrl}/news/finance`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/news/business`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/news/markets`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/news/economy`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
-    { url: `${baseUrl}/news/startups`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
+    { url: `${baseUrl}/news`, lastModified: new Date() },
+    { url: `${baseUrl}/news/finance`, lastModified: new Date() },
+    { url: `${baseUrl}/news/business`, lastModified: new Date() },
+    { url: `${baseUrl}/news/markets`, lastModified: new Date() },
+    { url: `${baseUrl}/news/economy`, lastModified: new Date() },
+    { url: `${baseUrl}/news/startups`, lastModified: new Date() },
   ];
 
-  // Dynamic news articles (capped at 500 most recent)
   let newsArticleUrls: MetadataRoute.Sitemap = [];
   try {
     const { data } = await supabase
@@ -87,23 +101,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       newsArticleUrls = data.map((a) => ({
         url: `${baseUrl}/news/${a.slug}`,
         lastModified: new Date(a.updated_at || a.published_at),
-        changeFrequency: "daily" as const,
-        priority: 0.7,
       }));
     }
   } catch (error) {
     console.error("Error fetching news articles for sitemap:", error);
   }
 
+  // --- Legal / static pages ---
+  const legalUrls: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/about`, lastModified: new Date("2026-01-01") },
+    { url: `${baseUrl}/contact`, lastModified: new Date("2026-01-01") },
+    { url: `${baseUrl}/privacy`, lastModified: new Date("2026-01-01") },
+    { url: `${baseUrl}/terms`, lastModified: new Date("2026-01-01") },
+    { url: `${baseUrl}/disclaimer`, lastModified: new Date("2026-01-01") },
+  ];
+
   return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "hourly",
-      priority: 1,
-    },
+    { url: baseUrl, lastModified: new Date() },
+    { url: `${baseUrl}/jobs`, lastModified: new Date() },
     ...cricketStaticUrls,
     ...newsStaticUrls,
+    ...legalUrls,
     ...categoryUrls,
     ...newsArticleUrls,
     ...notificationUrls,
