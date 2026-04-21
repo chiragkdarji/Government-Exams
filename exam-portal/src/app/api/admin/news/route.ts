@@ -41,6 +41,47 @@ export async function GET(request: NextRequest) {
   });
 }
 
+export async function POST(request: NextRequest) {
+  await requireAdmin();
+  const supabase = createServiceRoleClient();
+  const body = await request.json().catch(() => ({}));
+
+  const { headline, category, summary, content, cover_image_url, author, is_published, featured } = body;
+  if (!headline || !category) {
+    return NextResponse.json({ error: "headline and category are required" }, { status: 400 });
+  }
+
+  const slug = headline
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 100) + "-" + Date.now();
+
+  const { data, error } = await supabase
+    .from("news_articles")
+    .insert({
+      headline,
+      slug,
+      category,
+      summary: summary ?? "",
+      content: content ?? "",
+      cover_image_url: cover_image_url ?? null,
+      author: author ?? "Rizz Jobs Team",
+      source_name: "Manual",
+      source_url: "",
+      is_published: is_published ?? false,
+      featured: featured ?? false,
+      is_manual: true,
+      published_at: is_published ? new Date().toISOString() : null,
+    })
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data, { status: 201 });
+}
+
 export async function DELETE(request: NextRequest) {
   await requireAdmin();
   const supabase = createServiceRoleClient();

@@ -147,6 +147,11 @@ export async function generateMetadata({
     exam.ai_summary ||
     "Get the latest government exam updates and notifications.";
 
+  const deadlineStr = exam.deadline ? new Date(exam.deadline).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
+  const ogImage = exam.visuals?.notification_image
+    ? exam.visuals.notification_image
+    : `${baseUrl}/api/og?type=exam&title=${encodeURIComponent(metaTitle)}&deadline=${encodeURIComponent(deadlineStr)}&category=${encodeURIComponent(exam.source || "Gov Jobs")}`;
+
   return {
     title: metaTitle,
     description: metaDesc,
@@ -155,18 +160,15 @@ export async function generateMetadata({
       title: metaTitle,
       description: metaDesc,
       url: canonicalUrl,
+      siteName: "Rizz Jobs",
       type: "article",
-      images: exam.visuals?.notification_image
-        ? [{ url: exam.visuals.notification_image }]
-        : [],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: metaTitle }],
     },
     twitter: {
       card: "summary_large_image",
       title: metaTitle,
       description: metaDesc,
-      images: exam.visuals?.notification_image
-        ? [exam.visuals.notification_image]
-        : [],
+      images: [ogImage],
     },
     alternates: {
       canonical: canonicalUrl,

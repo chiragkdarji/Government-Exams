@@ -321,20 +321,36 @@ function normalizeInfo(raw: unknown) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { matchId } = await params;
   const base = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.rizzjobs.in";
+  const canonicalUrl = `https://rizzjobs.in/cricket/ipl/match/${matchId}`;
   try {
     const res = await fetch(`${base}/api/ipl/match/${matchId}`, { next: { revalidate: 60 } });
     if (res.ok) {
       const data = await res.json();
       const info = normalizeInfo(data?.info);
       if (info) {
+        const t1 = info.team1?.teamsname ?? "";
+        const t2 = info.team2?.teamsname ?? "";
+        const status = info.status || "";
+        const isLive = info.state === "In Progress";
+        const title = `${t1} vs ${t2} Scorecard — IPL 2026 | Rizz Jobs`;
+        const ogImage = `https://rizzjobs.in/api/og?type=ipl-match&team1=${encodeURIComponent(t1)}&team2=${encodeURIComponent(t2)}&status=${encodeURIComponent(status)}&live=${isLive ? "1" : "0"}`;
         return {
-          title: `${info.team1?.teamsname ?? ""} vs ${info.team2?.teamsname ?? ""} Scorecard — IPL 2026 | Rizz Jobs`,
-          description: info.status || "Scorecard for IPL 2026 match",
+          title,
+          description: status || `${t1} vs ${t2} live scorecard for IPL 2026`,
+          openGraph: {
+            title,
+            description: status || `${t1} vs ${t2} live scorecard for IPL 2026`,
+            url: canonicalUrl,
+            siteName: "Rizz Jobs",
+            images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+          },
+          twitter: { card: "summary_large_image", title, images: [ogImage] },
+          alternates: { canonical: canonicalUrl },
         };
       }
     }
   } catch {/* silently handle */}
-  return { title: "Match Scorecard — IPL 2026 | Rizz Jobs" };
+  return { title: "Match Scorecard — IPL 2026 | Rizz Jobs", alternates: { canonical: canonicalUrl } };
 }
 
 export default async function MatchPage({ params }: Props) {

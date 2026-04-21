@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ExternalLink, Trash2, Eye, EyeOff, RefreshCw } from "lucide-react";
+import { ExternalLink, Trash2, Eye, EyeOff, RefreshCw, PlusCircle } from "lucide-react";
 
 interface NewsArticle {
   id: string;
@@ -101,6 +101,13 @@ export default function AdminNewsPage() {
             <RefreshCw className="w-4 h-4" />
             Refresh
           </button>
+          <Link
+            href="/admin/news/new"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors"
+          >
+            <PlusCircle className="w-4 h-4" />
+            New Article
+          </Link>
         </div>
       </div>
 

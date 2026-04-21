@@ -14,18 +14,24 @@ import {
   PlusCircle,
   Newspaper,
   Rss,
+  Trophy,
 } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  // Jobs
   { href: "/admin/notifications/new", label: "Add Notification", icon: PlusCircle, exact: true },
   { href: "/admin/notifications", label: "Notifications", icon: NotebookText },
   { href: "/admin/subscribers", label: "Subscribers", icon: Mail },
   { href: "/admin/scraper", label: "Trigger Scraper", icon: Zap, exact: true },
   { href: "/admin/scraper-logs", label: "Scraper Logs", icon: ScrollText },
   { href: "/admin/digest", label: "Email Digest", icon: Clock },
+  // News
+  { href: "/admin/news/new", label: "New Article", icon: PlusCircle, exact: true },
   { href: "/admin/news", label: "News Articles", icon: Newspaper },
   { href: "/admin/news-sources", label: "News Sources", icon: Rss },
+  // Cricket
+  { href: "/admin/cricket", label: "Cricket CMS", icon: Trophy },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

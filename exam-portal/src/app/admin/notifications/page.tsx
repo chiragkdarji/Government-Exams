@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Search, Edit, Trash2, ChevronLeft, ChevronRight, ExternalLink, Plus, ChevronUp, ChevronDown, ChevronsUpDown, Sparkles } from "lucide-react";
+import { Search, Edit, Trash2, ChevronLeft, ChevronRight, ExternalLink, Plus, ChevronUp, ChevronDown, ChevronsUpDown, Sparkles, Upload } from "lucide-react";
 import RefillModal from "./RefillModal";
 
 interface Notification {
@@ -137,13 +137,16 @@ function NotificationsContent() {
             <p className="text-[11px] font-black uppercase tracking-widest text-indigo-400 mb-1.5">Admin Panel</p>
             <h1 className="text-3xl font-black">Notifications</h1>
           </div>
-          <Link
-            href="/admin/notifications/new"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            Add New
-          </Link>
+          <div className="flex items-center gap-2">
+            <CsvImportButton onImported={() => fetchNotifications()} />
+            <Link
+              href="/admin/notifications/new"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              Add New
+            </Link>
+          </div>
         </div>
 
         {error && (
@@ -314,6 +317,55 @@ function NotificationsContent() {
         />
       )}
     </main>
+  );
+}
+
+function CsvImportButton({ onImported }: { onImported: () => void }) {
+  const [importing, setImporting] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    setResult(null);
+    try {
+      const text = await file.text();
+      const res = await fetch("/api/admin/notifications/import", {
+        method: "POST",
+        headers: { "Content-Type": "text/csv" },
+        body: text,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Import failed");
+      setResult(`Imported ${data.imported} notifications${data.skipped ? ` (${data.skipped} skipped)` : ""}`);
+      onImported();
+    } catch (err) {
+      setResult(`Error: ${err instanceof Error ? err.message : "Unknown"}`);
+    } finally {
+      setImporting(false);
+      e.target.value = "";
+    }
+  };
+
+  return (
+    <div className="relative">
+      <label
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white text-sm font-bold transition-all cursor-pointer"
+        title="Import CSV: columns title, link, source, deadline, exam_date, ai_summary"
+      >
+        <Upload className="w-4 h-4" />
+        {importing ? "Importing..." : "Import CSV"}
+        <input type="file" accept=".csv,text/csv" className="hidden" onChange={handleFile} disabled={importing} />
+      </label>
+      {result && (
+        <div className={`absolute top-full mt-1 right-0 text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-50 ${
+          result.startsWith("Error") ? "bg-red-900/80 text-red-300" : "bg-green-900/80 text-green-300"
+        }`}>
+          {result}
+        </div>
+      )}
+    </div>
   );
 }
 
