@@ -13,9 +13,12 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // Legacy IPL redirects
-      { source: "/news/ipl", destination: "/ipl", permanent: true },
-      { source: "/news/ipl/:path*", destination: "/ipl/:path*", permanent: true },
+      // IPL → /cricket/ipl/* (301 permanent)
+      { source: "/ipl", destination: "/cricket/ipl", permanent: true },
+      { source: "/ipl/:path*", destination: "/cricket/ipl/:path*", permanent: true },
+      // Legacy /news/ipl/* (still chain through to new location)
+      { source: "/news/ipl", destination: "/cricket/ipl", permanent: true },
+      { source: "/news/ipl/:path*", destination: "/cricket/ipl/:path*", permanent: true },
       // Legal pages consolidation
       { source: "/news/about", destination: "/about", permanent: true },
       { source: "/news/contact", destination: "/contact", permanent: true },

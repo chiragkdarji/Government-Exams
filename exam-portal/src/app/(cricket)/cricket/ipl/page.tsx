@@ -179,7 +179,7 @@ export default async function IplHubPage() {
             <div>
               <div className="flex items-center justify-between mb-5">
                 <h2 className={SECTION_H2} style={SECTION_STYLE}>Points Table</h2>
-                <Link href="/ipl/points-table" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>Full Table →</Link>
+                <Link href="/cricket/ipl/points-table" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>Full Table →</Link>
               </div>
               {ptRows.length > 0 ? (
                 <IplPointsTable rows={ptRows} />
@@ -194,7 +194,7 @@ export default async function IplHubPage() {
             <div>
               <div className="flex items-center justify-between mb-5">
                 <h2 className={SECTION_H2} style={SECTION_STYLE}>Recent Results</h2>
-                <Link href="/ipl/schedule?tab=finished" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>All Results →</Link>
+                <Link href="/cricket/ipl/schedule?tab=finished" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>All Results →</Link>
               </div>
               {recentMatches.length > 0 ? (
                 <div className="space-y-2">
@@ -226,7 +226,7 @@ export default async function IplHubPage() {
         <section>
           <div className="flex items-center justify-between mb-5">
             <h2 className={SECTION_H2} style={SECTION_STYLE}>Upcoming Schedule</h2>
-            <Link href="/ipl/schedule" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>Full Schedule →</Link>
+            <Link href="/cricket/ipl/schedule" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>Full Schedule →</Link>
           </div>
           {fixtureMatches.length > 0 ? (
             <IplScheduleStrip matches={fixtureMatches} />
@@ -243,7 +243,7 @@ export default async function IplHubPage() {
             <div>
               <div className="flex items-center justify-between mb-5">
                 <h2 className={SECTION_H2} style={{ ...SECTION_STYLE, color: "#FF5A1F" }}>Orange Cap</h2>
-                <Link href="/ipl/orange-cap" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>Full List →</Link>
+                <Link href="/cricket/ipl/orange-cap" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>Full List →</Link>
               </div>
               {orangeCap.length > 0 ? (
                 <IplStatsWidget title="Orange Cap" players={orangeCap} unit="runs" accent="#FF5A1F" />
@@ -256,7 +256,7 @@ export default async function IplHubPage() {
             <div>
               <div className="flex items-center justify-between mb-5">
                 <h2 className={SECTION_H2} style={{ ...SECTION_STYLE, color: "#A855F7" }}>Purple Cap</h2>
-                <Link href="/ipl/purple-cap" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>Full List →</Link>
+                <Link href="/cricket/ipl/purple-cap" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>Full List →</Link>
               </div>
               {purpleCap.length > 0 ? (
                 <IplStatsWidget title="Purple Cap" players={purpleCap} unit="wkts" accent="#A855F7" />
@@ -273,7 +273,7 @@ export default async function IplHubPage() {
         <section>
           <div className="flex items-center justify-between mb-5">
             <h2 className={SECTION_H2} style={SECTION_STYLE}>Teams</h2>
-            <Link href="/ipl/teams" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>All Teams →</Link>
+            <Link href="/cricket/ipl/teams" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>All Teams →</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {Object.entries(IPL_TEAMS).map(([abbr, team]) => (
@@ -305,7 +305,7 @@ export default async function IplHubPage() {
         <section>
           <div className="flex items-center justify-between mb-5">
             <h2 className={SECTION_H2} style={SECTION_STYLE}>Latest News</h2>
-            <Link href="/ipl/news" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>All News →</Link>
+            <Link href="/cricket/ipl/news" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>All News →</Link>
           </div>
           {newsItems.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

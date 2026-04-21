@@ -9,7 +9,7 @@ const NAV = [
   { href: "/cricket/rankings", label: "Rankings" },
   { href: "/cricket/records", label: "Records" },
   { href: "/cricket/news", label: "News" },
-  { href: "/ipl", label: "IPL 2026" },
+  { href: "/cricket/ipl", label: "IPL 2026" },
 ];
 
 export default function CricketHeader() {
@@ -35,7 +35,7 @@ export default function CricketHeader() {
         </Link>
         <nav className="flex items-center gap-0.5 overflow-x-auto">
           {NAV.map((n) => {
-            const active = pathname === n.href || (n.href !== "/cricket" && pathname.startsWith(n.href));
+            const active = pathname === n.href || (n.href !== "/cricket" && n.href !== "/cricket/ipl" && pathname.startsWith(n.href)) || (n.href === "/cricket/ipl" && pathname.startsWith("/cricket/ipl"));
             return (
               <Link
                 key={n.href}

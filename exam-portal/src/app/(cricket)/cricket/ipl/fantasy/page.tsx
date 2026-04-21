@@ -19,7 +19,7 @@ export default function FantasyPage() {
         The Fantasy section is temporarily unavailable. Check back later.
       </p>
       <Link
-        href="/ipl"
+        href="/cricket/ipl"
         className="inline-block px-6 py-2.5 rounded-lg font-bold text-sm"
         style={{
           background: "#2A2A3A",

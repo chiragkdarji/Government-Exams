@@ -111,7 +111,7 @@ export default function Header() {
 
           {/* IPL 2026 Badge — visible on all screen sizes */}
           <Link
-            href="/ipl"
+            href="/cricket/ipl"
             className="flex items-center gap-1.5 shrink-0 rounded-full px-2.5 py-1.5 lg:px-3 transition-all hover:scale-105 active:scale-95"
             style={{
               background: "linear-gradient(135deg, #FF6B00 0%, #FFD700 100%)",
@@ -267,7 +267,7 @@ export default function Header() {
 
             {/* IPL Featured Card */}
             <Link
-              href="/ipl"
+              href="/cricket/ipl"
               onClick={() => setShowMobileMenu(false)}
               className="flex items-center justify-between px-3 py-3 rounded-xl mb-2 transition-all hover:scale-[1.01] active:scale-[0.99]"
               style={{

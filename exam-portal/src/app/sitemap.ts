@@ -54,14 +54,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/cricket/rankings`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
     { url: `${baseUrl}/cricket/records`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/cricket/news`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/ipl`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.9 },
-    { url: `${baseUrl}/ipl/schedule`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/ipl/points-table`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/ipl/orange-cap`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
-    { url: `${baseUrl}/ipl/purple-cap`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
-    { url: `${baseUrl}/ipl/teams`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/ipl/news`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${baseUrl}/ipl/stats`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
+    { url: `${baseUrl}/cricket/ipl`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.9 },
+    { url: `${baseUrl}/cricket/ipl/schedule`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
+    { url: `${baseUrl}/cricket/ipl/points-table`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
+    { url: `${baseUrl}/cricket/ipl/orange-cap`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
+    { url: `${baseUrl}/cricket/ipl/purple-cap`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
+    { url: `${baseUrl}/cricket/ipl/teams`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/cricket/ipl/news`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
+    { url: `${baseUrl}/cricket/ipl/stats`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
   ];
 
   // Static news section pages
@@ -72,7 +72,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/news/markets`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
     { url: `${baseUrl}/news/economy`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
     { url: `${baseUrl}/news/startups`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
-    { url: `${baseUrl}/news/ipl`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
   ];
 
   // Dynamic news articles (capped at 500 most recent)

@@ -85,7 +85,7 @@ export default async function SchedulePage({ searchParams }: PageProps) {
         style={{ background: "#12121A", border: "1px solid #2A2A3A" }}
       >
         <Link
-          href="/ipl/schedule"
+          href="/cricket/ipl/schedule"
           className="px-5 py-2 rounded-lg text-sm font-bold transition-colors"
           style={{
             background: !showFinished ? "#2A2A3A" : "transparent",
@@ -104,7 +104,7 @@ export default async function SchedulePage({ searchParams }: PageProps) {
           )}
         </Link>
         <Link
-          href="/ipl/schedule?tab=finished"
+          href="/cricket/ipl/schedule?tab=finished"
           className="px-5 py-2 rounded-lg text-sm font-bold transition-colors"
           style={{
             background: showFinished ? "#2A2A3A" : "transparent",

@@ -237,7 +237,7 @@ export default function IplLiveSection({ initialMatches, nextMatch }: Props) {
       <div className="max-w-7xl mx-auto px-4 pt-10">
         <div className="flex items-center justify-between mb-5">
           <h2 className={SECTION_H2} style={SECTION_STYLE}>Live Scores</h2>
-          <Link href="/ipl/schedule" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>
+          <Link href="/cricket/ipl/schedule" className="text-sm font-semibold" style={VIEW_ALL_STYLE}>
             View Schedule →
           </Link>
         </div>

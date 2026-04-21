@@ -396,7 +396,7 @@ export default async function MatchPage({ params }: Props) {
       {!info && (
         <div className="rounded-xl p-6 text-center" style={{ background: "#12121A", border: "1px solid #2A2A3A" }}>
           <p className="text-sm" style={{ color: "#5A566A" }}>Match data not available.</p>
-          <Link href="/ipl/schedule" className="inline-block mt-4 text-sm font-semibold" style={{ color: "#9A96A0" }}>
+          <Link href="/cricket/ipl/schedule" className="inline-block mt-4 text-sm font-semibold" style={{ color: "#9A96A0" }}>
             ← Back to Schedule
           </Link>
         </div>

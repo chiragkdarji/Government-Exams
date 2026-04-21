@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV = [
-  { label: "Scores", href: "/ipl" },
-  { label: "Schedule", href: "/ipl/schedule" },
-  { label: "Points Table", href: "/ipl/points-table" },
-  { label: "Orange Cap", href: "/ipl/orange-cap" },
-  { label: "Purple Cap", href: "/ipl/purple-cap" },
-  { label: "Teams", href: "/ipl/teams" },
-  { label: "News", href: "/ipl/news" },
+  { label: "Scores", href: "/cricket/ipl" },
+  { label: "Schedule", href: "/cricket/ipl/schedule" },
+  { label: "Points Table", href: "/cricket/ipl/points-table" },
+  { label: "Orange Cap", href: "/cricket/ipl/orange-cap" },
+  { label: "Purple Cap", href: "/cricket/ipl/purple-cap" },
+  { label: "Teams", href: "/cricket/ipl/teams" },
+  { label: "News", href: "/cricket/ipl/news" },
 ];
 
 export default function IplHeader() {
@@ -28,7 +28,7 @@ export default function IplHeader() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 flex items-center gap-4 h-14">
-        <Link href="/ipl" className="flex items-center gap-2 shrink-0">
+        <Link href="/cricket/ipl" className="flex items-center gap-2 shrink-0">
           <span
             className="text-lg font-bold tracking-wider"
             style={{ color: "#FFB800" }}
@@ -45,8 +45,8 @@ export default function IplHeader() {
         <nav className="flex items-center gap-0.5 overflow-x-auto flex-1">
           {NAV.map((item) => {
             const isActive =
-              item.href === "/ipl"
-                ? pathname === "/ipl"
+              item.href === "/cricket/ipl"
+                ? pathname === "/cricket/ipl"
                 : pathname?.startsWith(item.href);
             return (
               <Link
