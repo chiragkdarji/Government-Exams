@@ -22,16 +22,16 @@ interface Notification {
 }
 
 const CATEGORIES = [
-  { name: "All", path: "/" },
-  { name: "10th / 12th Pass", path: "/10th-12th-pass" },
-  { name: "Banking", path: "/banking" },
-  { name: "Railway", path: "/railway" },
-  { name: "Defense / Police", path: "/defense-police" },
-  { name: "UPSC / SSC", path: "/upsc-ssc" },
-  { name: "Teaching", path: "/teaching" },
-  { name: "Engineering", path: "/engineering" },
-  { name: "Medical", path: "/medical" },
-  { name: "PSU", path: "/psu" },
+  { name: "All", path: "/jobs" },
+  { name: "10th / 12th Pass", path: "/jobs/10th-12th-pass" },
+  { name: "Banking", path: "/jobs/banking" },
+  { name: "Railway", path: "/jobs/railway" },
+  { name: "Defense / Police", path: "/jobs/defense-police" },
+  { name: "UPSC / SSC", path: "/jobs/upsc-ssc" },
+  { name: "Teaching", path: "/jobs/teaching" },
+  { name: "Engineering", path: "/jobs/engineering" },
+  { name: "Medical", path: "/jobs/medical" },
+  { name: "PSU", path: "/jobs/psu" },
 ];
 
 interface CategoryRow {
@@ -41,7 +41,7 @@ interface CategoryRow {
   description: string;
   tagline: string;
   keywords: string[];
-  filter_mode: string; // 'category' | 'title_keyword'
+  filter_mode: string;
   is_active: boolean;
 }
 
@@ -80,11 +80,9 @@ async function getNotifications(
       .order("created_at", { ascending: false });
 
     if (cat.filter_mode === "title_keyword") {
-      // Use first keyword as the title filter (e.g. "admit card", "result")
       const keyword = cat.keywords[0] || cat.name;
       query = query.ilike("title", `%${keyword}%`);
     } else {
-      // Default: JSONB category containment filter
       query = query.filter("details->categories", "cs", JSON.stringify([cat.name]));
     }
 
@@ -157,10 +155,11 @@ export async function generateMetadata({
   return {
     title: `${cat.name} Jobs - Government Exam Notifications | Rizz Jobs`,
     description: `Latest ${cat.name} job notifications and exam updates. ${cat.tagline}`,
+    alternates: { canonical: `https://rizzjobs.in/jobs/${slug}` },
   };
 }
 
-export default async function DynamicCategoryPage({
+export default async function JobsCategoryPage({
   params,
   searchParams,
 }: {
@@ -201,14 +200,14 @@ export default async function DynamicCategoryPage({
           )}
         </section>
 
-        {/* Category Tabs — horizontally scrollable on mobile */}
+        {/* Category Tabs */}
         <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-1 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap">
           {CATEGORIES.map((tab) => (
             <Link
               key={tab.name}
               href={tab.path}
               className={`shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-                tab.path === `/${cat.slug}`
+                tab.path === `/jobs/${cat.slug}`
                   ? "bg-indigo-600 border border-indigo-500 text-white font-bold"
                   : "bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:border-indigo-500/30"
               }`}
@@ -293,7 +292,7 @@ export default async function DynamicCategoryPage({
         </div>
 
         {notifications.length > 0 && totalPages > 1 && (
-          <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={`/${cat.slug}`} />
+          <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={`/jobs/${cat.slug}`} />
         )}
       </main>
     </div>

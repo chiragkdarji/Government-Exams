@@ -3,16 +3,16 @@ import React from "react";
 import { Sparkles } from "lucide-react";
 
 const FOOTER_CATEGORIES = [
-  { name: "UPSC / SSC", path: "/upsc-ssc" },
-  { name: "Banking", path: "/banking" },
-  { name: "Railway", path: "/railway" },
-  { name: "Defense / Police", path: "/defense-police" },
-  { name: "Teaching", path: "/teaching" },
-  { name: "Engineering", path: "/engineering" },
-  { name: "Medical", path: "/medical" },
-  { name: "PSU", path: "/psu" },
-  { name: "10th / 12th Pass", path: "/10th-12th-pass" },
-  { name: "State Jobs", path: "/state-jobs" },
+  { name: "UPSC / SSC", path: "/jobs/upsc-ssc" },
+  { name: "Banking", path: "/jobs/banking" },
+  { name: "Railway", path: "/jobs/railway" },
+  { name: "Defense / Police", path: "/jobs/defense-police" },
+  { name: "Teaching", path: "/jobs/teaching" },
+  { name: "Engineering", path: "/jobs/engineering" },
+  { name: "Medical", path: "/jobs/medical" },
+  { name: "PSU", path: "/jobs/psu" },
+  { name: "10th / 12th Pass", path: "/jobs/10th-12th-pass" },
+  { name: "State Jobs", path: "/jobs/state-jobs" },
 ];
 
 export default function Footer() {

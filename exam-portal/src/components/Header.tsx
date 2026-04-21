@@ -12,24 +12,24 @@ const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/news", label: "News" },
-  { href: "/admit-cards", label: "Admit Cards" },
-  { href: "/results", label: "Results" },
-  { href: "/state-jobs", label: "State Jobs" },
+  { href: "/jobs/admit-cards", label: "Admit Cards" },
+  { href: "/jobs/results", label: "Results" },
+  { href: "/jobs/state-jobs", label: "State Jobs" },
 ];
 
 const MOBILE_CATEGORIES = [
   { name: "All Jobs", path: "/" },
   { name: "Finance News", path: "/news/finance" },
   { name: "Business News", path: "/news/business" },
-  { name: "Banking", path: "/banking" },
-  { name: "Railway", path: "/railway" },
-  { name: "UPSC / SSC", path: "/upsc-ssc" },
-  { name: "Defense", path: "/defense-police" },
-  { name: "Teaching", path: "/teaching" },
-  { name: "Engineering", path: "/engineering" },
-  { name: "Medical", path: "/medical" },
-  { name: "10th / 12th", path: "/10th-12th-pass" },
-  { name: "PSU", path: "/psu" },
+  { name: "Banking", path: "/jobs/banking" },
+  { name: "Railway", path: "/jobs/railway" },
+  { name: "UPSC / SSC", path: "/jobs/upsc-ssc" },
+  { name: "Defense", path: "/jobs/defense-police" },
+  { name: "Teaching", path: "/jobs/teaching" },
+  { name: "Engineering", path: "/jobs/engineering" },
+  { name: "Medical", path: "/jobs/medical" },
+  { name: "10th / 12th", path: "/jobs/10th-12th-pass" },
+  { name: "PSU", path: "/jobs/psu" },
 ];
 
 export default function Header() {

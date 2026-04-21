@@ -25,6 +25,19 @@ const nextConfig: NextConfig = {
       { source: "/news/privacy", destination: "/privacy", permanent: true },
       { source: "/news/terms", destination: "/terms", permanent: true },
       { source: "/news/disclaimer", destination: "/disclaimer", permanent: true },
+      // Job category pages → /jobs/* (301 permanent)
+      { source: "/10th-12th-pass", destination: "/jobs/10th-12th-pass", permanent: true },
+      { source: "/banking", destination: "/jobs/banking", permanent: true },
+      { source: "/railway", destination: "/jobs/railway", permanent: true },
+      { source: "/defense-police", destination: "/jobs/defense-police", permanent: true },
+      { source: "/upsc-ssc", destination: "/jobs/upsc-ssc", permanent: true },
+      { source: "/teaching", destination: "/jobs/teaching", permanent: true },
+      { source: "/engineering", destination: "/jobs/engineering", permanent: true },
+      { source: "/medical", destination: "/jobs/medical", permanent: true },
+      { source: "/psu", destination: "/jobs/psu", permanent: true },
+      { source: "/admit-cards", destination: "/jobs/admit-cards", permanent: true },
+      { source: "/results", destination: "/jobs/results", permanent: true },
+      { source: "/state-jobs", destination: "/jobs/state-jobs", permanent: true },
     ];
   },
 };

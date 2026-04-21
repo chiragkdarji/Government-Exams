@@ -36,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .order("sort_order");
     if (data) {
       categoryUrls = data.map((c) => ({
-        url: `${baseUrl}/${c.slug}`,
+        url: `${baseUrl}/jobs/${c.slug}`,
         lastModified: new Date(),
         changeFrequency: "daily" as const,
         priority: 0.7,
