@@ -601,52 +601,9 @@ export default async function ExamDetail({
             </div>
           </div>
 
-          {/* Top Action Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <div className="flex-1">
-              {(() => {
-                const cta = getCtaContent(exam.title, exam.ai_summary, exam.deadline);
-                return (
-                  <div className="p-6 bg-gradient-to-br from-cyan-600 via-indigo-600 to-purple-700 rounded-[2rem] shadow-2xl shadow-indigo-600/40 relative overflow-hidden group h-full flex flex-col justify-between">
-                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                    <div>
-                      <h3 className="text-xl font-black italic mb-2 tracking-tighter">{cta.title}</h3>
-                      <p className="text-indigo-100 text-sm mb-4 font-medium">{cta.desc}</p>
-                    </div>
-                    <ResolveUrl title={exam.title} link={exam.link} source={exam.source} />
-                  </div>
-                );
-              })()}
-            </div>
-            <div className="flex flex-col gap-4 sm:w-64">
-              <div className="p-4 bg-white/[0.03] border border-white/5 rounded-2xl">
-                <BookmarkButton notificationId={exam.id} />
-              </div>
-              <div className="p-4 bg-white/[0.03] border border-white/5 rounded-2xl">
-                <div className="flex items-center gap-2 text-gray-400 mb-2">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Update History</span>
-                </div>
-                <p className="text-xs text-gray-500">
-                  Last updated on{" "}
-                  {new Date(exam.created_at).toLocaleString("en-IN", {
-                    timeZone: "Asia/Kolkata",
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                  })}{" "}
-                  IST.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-12">
-            {/* Full-Width Details */}
-            <div className="space-y-12 text-gray-300">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            {/* Left Column: Details */}
+            <div className="lg:col-span-2 space-y-12 text-gray-300">
               {/* Notification Image (Primary Hero Visual) */}
               <HeroNotificationBanner
                 imageUrl={
@@ -931,27 +888,86 @@ export default async function ExamDetail({
               )}
             </div>
 
-            {/* Related Jobs — full width at bottom */}
-            {related.length > 0 && (
-              <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl">
-                <div className="flex items-center gap-2 text-gray-400 mb-4">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Related Jobs</span>
+            {/* Right Column: Sidebar Actions */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-32 space-y-6">
+                {(() => {
+                  const cta = getCtaContent(exam.title, exam.ai_summary, exam.deadline);
+                  return (
+                <div className="p-8 bg-gradient-to-br from-cyan-600 via-indigo-600 to-purple-700 rounded-[2.5rem] shadow-2xl shadow-indigo-600/40 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                  <h3 className="text-2xl font-black italic mb-4 tracking-tighter">
+                    {cta.title}
+                  </h3>
+                  <p className="text-indigo-100 text-sm mb-8 font-medium">
+                    {cta.desc}
+                  </p>
+                  <ResolveUrl
+                    title={exam.title}
+                    link={exam.link}
+                    source={exam.source}
+                  />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {(related as RelatedNotification[]).map((r) => (
-                    <Link key={r.id} href={`/exam/${r.slug || r.id}`} className="block group">
-                      <p className="text-sm font-medium text-white group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
-                        {r.title}
-                      </p>
-                      {r.deadline && (
-                        <p className="text-xs text-gray-500 mt-1">Apply by: {formatDate(r.deadline)}</p>
-                      )}
-                    </Link>
-                  ))}
+                  );
+                })()}
+
+                <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl">
+                  <BookmarkButton notificationId={exam.id} />
                 </div>
+
+                <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl">
+                  <div className="flex items-center gap-2 text-gray-400 mb-4">
+                    <Clock className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-widest">
+                      Update History
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    This notification was last updated on{" "}
+                    {new Date(exam.created_at).toLocaleString("en-IN", {
+                      timeZone: "Asia/Kolkata",
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    })}{" "}
+                    IST.
+                  </p>
+                </div>
+
+                {/* Related Jobs */}
+                {related.length > 0 && (
+                  <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl">
+                    <div className="flex items-center gap-2 text-gray-400 mb-4">
+                      <Sparkles className="w-4 h-4" />
+                      <span className="text-xs font-bold uppercase tracking-widest">
+                        Related Jobs
+                      </span>
+                    </div>
+                    <div className="space-y-4">
+                      {(related as RelatedNotification[]).map((r) => (
+                        <Link
+                          key={r.id}
+                          href={`/exam/${r.slug || r.id}`}
+                          className="block group"
+                        >
+                          <p className="text-sm font-medium text-white group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
+                            {r.title}
+                          </p>
+                          {r.deadline && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              Apply by: {formatDate(r.deadline)}
+                            </p>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </main>
