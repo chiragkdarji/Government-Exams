@@ -2,12 +2,12 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Contact | Rizz Jobs Financial Intelligence",
-  description: "Contact the Rizz Jobs Financial Intelligence editorial team for corrections, feedback, or press enquiries.",
-  alternates: { canonical: "https://rizzjobs.in/news/contact" },
+  title: "Contact | Rizz Jobs",
+  description: "Contact the Rizz Jobs team for corrections, feedback, or press enquiries.",
+  alternates: { canonical: "https://rizzjobs.in/contact" },
 };
 
-export default function NewsContactPage() {
+export default function ContactPage() {
   return (
     <div style={{ backgroundColor: "#070708", minHeight: "100vh" }}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16">
@@ -23,7 +23,6 @@ export default function NewsContactPage() {
         </h1>
 
         <div className="space-y-10">
-
           {[
             {
               title: "Editorial Corrections",
@@ -32,7 +31,7 @@ export default function NewsContactPage() {
             },
             {
               title: "Feedback & Suggestions",
-              desc: "We welcome reader feedback on our coverage, tone, and topics. Tell us what financial stories matter most to you.",
+              desc: "We welcome reader feedback on our coverage, tone, and topics. Tell us what stories matter most to you.",
               email: "feedback@rizzjobs.in",
             },
             {
@@ -63,7 +62,7 @@ export default function NewsContactPage() {
               Publishing Principles
             </p>
             <p className="text-[13px] leading-relaxed" style={{ color: "#7c7888" }}>
-              Read about our <Link href="/news/about" className="transition-colors hover:text-[#f2ede6]" style={{ color: "#f0a500" }}>editorial approach</Link>, our <Link href="/news/disclaimer" className="transition-colors hover:text-[#f2ede6]" style={{ color: "#f0a500" }}>disclaimer</Link>, and our <Link href="/news/privacy" className="transition-colors hover:text-[#f2ede6]" style={{ color: "#f0a500" }}>privacy policy</Link>.
+              Read about our <Link href="/about" className="transition-colors hover:text-[#f2ede6]" style={{ color: "#f0a500" }}>editorial approach</Link>, our <Link href="/disclaimer" className="transition-colors hover:text-[#f2ede6]" style={{ color: "#f0a500" }}>disclaimer</Link>, and our <Link href="/privacy" className="transition-colors hover:text-[#f2ede6]" style={{ color: "#f0a500" }}>privacy policy</Link>.
             </p>
           </div>
         </div>

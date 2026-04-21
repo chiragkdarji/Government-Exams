@@ -2,15 +2,15 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Disclaimer | Rizz Jobs Financial Intelligence",
-  description: "Financial disclaimer for Rizz Jobs Financial Intelligence. Content is for informational purposes only and does not constitute financial advice.",
-  alternates: { canonical: "https://rizzjobs.in/news/disclaimer" },
+  title: "Disclaimer | Rizz Jobs",
+  description: "Disclaimer for Rizz Jobs. Financial content is for informational purposes only and does not constitute financial advice.",
+  alternates: { canonical: "https://rizzjobs.in/disclaimer" },
 };
 
 const SECTIONS = [
   {
     heading: "Not Financial Advice",
-    body: `All content published by Rizz Jobs Financial Intelligence — including articles, summaries, market briefings, and newsletter editions — is provided for informational and educational purposes only. Nothing on this platform constitutes financial advice, investment advice, trading advice, or any other form of professional financial guidance.`,
+    body: `All financial content published by Rizz Jobs — including articles, summaries, market briefings, and newsletter editions — is provided for informational and educational purposes only. Nothing on this platform constitutes financial advice, investment advice, trading advice, or any other form of professional financial guidance.`,
   },
   {
     heading: "AI-Generated Content",
@@ -23,6 +23,10 @@ const SECTIONS = [
   {
     heading: "Independent Verification",
     body: `Readers should independently verify any financial information before making investment decisions. We strongly recommend consulting a SEBI-registered financial advisor or investment professional before making any financial decision.`,
+  },
+  {
+    heading: "Government Jobs Content",
+    body: `Job notification details including vacancies, eligibility criteria, exam dates, and application deadlines are sourced from public announcements. Rizz Jobs is not an official government body. Always verify details on the official recruiting organisation's website before applying.`,
   },
   {
     heading: "Third-Party Sources",
@@ -38,7 +42,7 @@ const SECTIONS = [
   },
 ];
 
-export default function NewsDisclaimerPage() {
+export default function DisclaimerPage() {
   return (
     <div style={{ backgroundColor: "#070708", minHeight: "100vh" }}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16">
@@ -70,9 +74,9 @@ export default function NewsDisclaimerPage() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-4">
-          <Link href="/news/privacy" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Privacy Policy</Link>
-          <Link href="/news/terms" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Terms & Conditions</Link>
-          <Link href="/news/contact" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Contact</Link>
+          <Link href="/privacy" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Privacy Policy</Link>
+          <Link href="/terms" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Terms & Conditions</Link>
+          <Link href="/contact" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Contact</Link>
         </div>
       </div>
     </div>

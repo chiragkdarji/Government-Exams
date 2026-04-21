@@ -13,8 +13,15 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Legacy IPL redirects
       { source: "/news/ipl", destination: "/ipl", permanent: true },
       { source: "/news/ipl/:path*", destination: "/ipl/:path*", permanent: true },
+      // Legal pages consolidation
+      { source: "/news/about", destination: "/about", permanent: true },
+      { source: "/news/contact", destination: "/contact", permanent: true },
+      { source: "/news/privacy", destination: "/privacy", permanent: true },
+      { source: "/news/terms", destination: "/terms", permanent: true },
+      { source: "/news/disclaimer", destination: "/disclaimer", permanent: true },
     ];
   },
 };

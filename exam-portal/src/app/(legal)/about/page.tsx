@@ -2,12 +2,12 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About | Rizz Jobs Financial Intelligence",
-  description: "About Rizz Jobs Financial Intelligence — AI-curated Indian finance, business, markets, economy and startup news.",
-  alternates: { canonical: "https://rizzjobs.in/news/about" },
+  title: "About | Rizz Jobs",
+  description: "About Rizz Jobs — India's government job notifications, AI-curated financial news, and live cricket scores.",
+  alternates: { canonical: "https://rizzjobs.in/about" },
 };
 
-export default function NewsAboutPage() {
+export default function AboutPage() {
   return (
     <div style={{ backgroundColor: "#070708", minHeight: "100vh" }}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16">
@@ -24,10 +24,10 @@ export default function NewsAboutPage() {
 
         <div className="space-y-5 text-[14px] leading-[1.85]" style={{ color: "#9a9699" }}>
           <p>
-            Rizz Jobs Financial Intelligence is an AI-curated news service that brings together the most relevant finance, business, markets, economy, and startup stories for India&apos;s investors and working professionals.
+            Rizz Jobs is India&apos;s destination for government job notifications, AI-curated financial news, and live cricket coverage — all in one place.
           </p>
           <p>
-            Our editorial pipeline aggregates news from credible Indian and global financial sources, then uses AI to rewrite, contextualise, and categorise each story — adding market implications, Indian investor perspective, and concise summaries that respect your time.
+            Our Financial Intelligence service aggregates news from credible Indian and global financial sources, then uses AI to rewrite, contextualise, and categorise each story — adding market implications, Indian investor perspective, and concise summaries that respect your time.
           </p>
           <p>
             We publish several times a day across five coverage areas: Finance, Business, Markets, Economy, and Startups. Every article is reviewed for accuracy and relevance before publication.
@@ -47,6 +47,8 @@ export default function NewsAboutPage() {
                 ["Markets", "Nifty, Sensex, NSE, BSE, IPOs, F&O, commodities"],
                 ["Economy", "GDP, inflation, fiscal policy, trade, employment"],
                 ["Startups", "Funding rounds, unicorns, VC/PE deals, Indian tech ecosystem"],
+                ["Government Jobs", "Exam dates, deadlines, eligibility & vacancies across Banking, Railway, UPSC, SSC, Teaching"],
+                ["Cricket / IPL", "Live international scores, IPL 2026 standings, rankings, and records"],
               ].map(([cat, desc]) => (
                 <li key={cat} className="flex gap-3 text-[13px]">
                   <span style={{ color: "#f0a500" }} className="shrink-0 font-black">{cat}</span>
@@ -57,10 +59,7 @@ export default function NewsAboutPage() {
           </div>
 
           <p>
-            Rizz Jobs Financial Intelligence is part of <Link href="/" className="transition-colors hover:text-[#f2ede6]" style={{ color: "#f0a500" }}>Rizz Jobs</Link>, India&apos;s government job notification platform. Our news coverage is operated as a separate editorial service.
-          </p>
-          <p>
-            For questions, corrections, or editorial feedback, please <Link href="/news/contact" className="transition-colors hover:text-[#f2ede6]" style={{ color: "#f0a500" }}>contact us</Link>.
+            For questions, corrections, or editorial feedback, please <Link href="/contact" className="transition-colors hover:text-[#f2ede6]" style={{ color: "#f0a500" }}>contact us</Link>.
           </p>
         </div>
       </div>

@@ -2,19 +2,19 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | Rizz Jobs Financial Intelligence",
-  description: "Terms and conditions for using Rizz Jobs Financial Intelligence news service.",
-  alternates: { canonical: "https://rizzjobs.in/news/terms" },
+  title: "Terms & Conditions | Rizz Jobs",
+  description: "Terms and conditions for using Rizz Jobs — government jobs, financial news, and cricket coverage.",
+  alternates: { canonical: "https://rizzjobs.in/terms" },
 };
 
 const SECTIONS = [
   {
     heading: "Acceptance of Terms",
-    body: `By accessing or using the Rizz Jobs Financial Intelligence news service at rizzjobs.in/news, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use this service.`,
+    body: `By accessing or using Rizz Jobs at rizzjobs.in, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use this service.`,
   },
   {
     heading: "Service Description",
-    body: `Rizz Jobs Financial Intelligence provides AI-curated financial news summaries for informational purposes. We aggregate and rewrite publicly available news for Indian investors and professionals. The service is provided free of charge.`,
+    body: `Rizz Jobs provides government job notifications, AI-curated financial news summaries, and live cricket coverage for informational purposes. Content is aggregated from publicly available sources. The service is provided free of charge.`,
   },
   {
     heading: "Intellectual Property",
@@ -26,7 +26,7 @@ const SECTIONS = [
   },
   {
     heading: "Newsletter Subscription",
-    body: `By subscribing to our newsletter, you consent to receive email communications from Rizz Jobs Financial Intelligence. Subscriptions are confirmed via email. You may unsubscribe at any time using the link in any email we send.`,
+    body: `By subscribing to our newsletter, you consent to receive email communications from Rizz Jobs. Subscriptions are confirmed via email. You may unsubscribe at any time using the link in any email we send.`,
   },
   {
     heading: "Content Accuracy",
@@ -46,7 +46,7 @@ const SECTIONS = [
   },
 ];
 
-export default function NewsTermsPage() {
+export default function TermsPage() {
   return (
     <div style={{ backgroundColor: "#070708", minHeight: "100vh" }}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16">
@@ -87,9 +87,9 @@ export default function NewsTermsPage() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-4">
-          <Link href="/news/privacy" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Privacy Policy</Link>
-          <Link href="/news/disclaimer" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Disclaimer</Link>
-          <Link href="/news/contact" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Contact</Link>
+          <Link href="/privacy" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Privacy Policy</Link>
+          <Link href="/disclaimer" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Disclaimer</Link>
+          <Link href="/contact" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Contact</Link>
         </div>
       </div>
     </div>

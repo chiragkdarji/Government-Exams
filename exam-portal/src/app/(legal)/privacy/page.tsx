@@ -2,23 +2,23 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Rizz Jobs Financial Intelligence",
-  description: "Privacy policy for Rizz Jobs Financial Intelligence news service.",
-  alternates: { canonical: "https://rizzjobs.in/news/privacy" },
+  title: "Privacy Policy | Rizz Jobs",
+  description: "Privacy policy for Rizz Jobs — government jobs, financial news, and cricket coverage.",
+  alternates: { canonical: "https://rizzjobs.in/privacy" },
 };
 
 const SECTIONS = [
   {
     heading: "Information We Collect",
-    body: `When you subscribe to our newsletter, we collect your email address and your topic and frequency preferences. We do not collect any other personal information unless you contact us directly.`,
+    body: `Rizz Jobs is primarily a public notification and news portal. You can browse government job alerts, financial news, and cricket scores without creating an account or providing personal information. When you subscribe to our newsletter, we collect your email address and your topic and frequency preferences. We may also collect anonymous usage data to improve our service.`,
   },
   {
     heading: "How We Use Your Information",
-    body: `Your email address is used solely to send you the Financial Intelligence newsletter you subscribed to. We do not use your email for any other purpose, and we do not share, sell, or rent your email address to any third party.`,
+    body: `Your email address is used solely to send you the newsletters and notifications you subscribed to. We do not use your email for any other purpose, and we do not share, sell, or rent your email address to any third party. Anonymous usage data is used only for analysing traffic trends and ensuring the platform remains stable.`,
   },
   {
     heading: "Newsletter & Email Communications",
-    body: `By subscribing, you consent to receive editorial newsletters from Rizz Jobs Financial Intelligence. Every email includes an unsubscribe link. You can unsubscribe at any time, and your data will be removed from our mailing list within 7 days.`,
+    body: `By subscribing, you consent to receive editorial newsletters from Rizz Jobs. Every email includes an unsubscribe link. You can unsubscribe at any time, and your data will be removed from our mailing list within 7 days.`,
   },
   {
     heading: "Cookies & Analytics",
@@ -42,7 +42,7 @@ const SECTIONS = [
   },
 ];
 
-export default function NewsPrivacyPage() {
+export default function PrivacyPage() {
   return (
     <div style={{ backgroundColor: "#070708", minHeight: "100vh" }}>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16">
@@ -83,9 +83,9 @@ export default function NewsPrivacyPage() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-4">
-          <Link href="/news/terms" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Terms & Conditions</Link>
-          <Link href="/news/disclaimer" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Disclaimer</Link>
-          <Link href="/news/contact" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Contact</Link>
+          <Link href="/terms" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Terms & Conditions</Link>
+          <Link href="/disclaimer" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Disclaimer</Link>
+          <Link href="/contact" className="text-[10px] font-black uppercase tracking-[0.16em] transition-colors hover:text-[#f2ede6]" style={{ color: "#7c7888" }}>Contact</Link>
         </div>
       </div>
     </div>
