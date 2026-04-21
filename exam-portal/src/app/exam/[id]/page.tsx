@@ -544,7 +544,7 @@ export default async function ExamDetail({
         );
       })()}
 
-      <main className="max-w-5xl mx-auto px-6 py-12">
+      <main className="max-w-7xl mx-auto px-6 py-12">
         <Link
           href="/"
           className="flex items-center gap-3 group mb-8 hover:no-underline"
