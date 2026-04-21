@@ -298,7 +298,7 @@ export default function SiteHeader() {
           {/* Tier 2 chips */}
           <div
             ref={chipsRef}
-            className="flex items-center gap-1.5 px-4 py-2 overflow-x-auto scrollbar-hide"
+            className="flex items-center gap-1.5 px-4 py-2 overflow-x-auto scrollbar-hide max-w-7xl mx-auto"
             style={{ touchAction: "pan-x" }}
           >
             {chips.map((chip) => {
