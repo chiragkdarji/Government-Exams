@@ -101,6 +101,8 @@ export default async function NewsPage({ searchParams }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {page > 1 && <link rel="prev" href={page === 2 ? BASE_URL : `${BASE_URL}?page=${page - 1}`} />}
+      {page < totalPages && <link rel="next" href={`${BASE_URL}?page=${page + 1}`} />}
 
       <div style={{ backgroundColor: "#070708", minHeight: "100vh" }}>
 

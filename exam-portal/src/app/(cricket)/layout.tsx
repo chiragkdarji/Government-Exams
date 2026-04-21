@@ -1,4 +1,19 @@
+import type { Metadata } from "next";
 import { Rajdhani, Inter } from "next/font/google";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Live Cricket Scores, IPL 2026, Rankings & Records | Rizz Jobs",
+    template: "%s | Cricket — Rizz Jobs",
+  },
+  description:
+    "Follow live international cricket, IPL 2026 scores, ICC rankings, player stats, and cricket news — all in one place.",
+  openGraph: {
+    siteName: "Rizz Jobs",
+    locale: "en_IN",
+    type: "website",
+  },
+};
 
 const rajdhani = Rajdhani({
   subsets: ["latin"],

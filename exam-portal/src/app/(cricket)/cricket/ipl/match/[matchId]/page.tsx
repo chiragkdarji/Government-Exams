@@ -360,8 +360,40 @@ export default async function MatchPage({ params }: Props) {
   const t1c = info?.team1 ? teamColors(info.team1.teamname) : { bg: "#1A1A26", color: "#F0EDE8" };
   const t2c = info?.team2 ? teamColors(info.team2.teamname) : { bg: "#1A1A26", color: "#F0EDE8" };
 
+  const canonicalUrl = `https://rizzjobs.in/cricket/ipl/match/${matchId}`;
+  const sportsEventSchema = info
+    ? {
+        "@context": "https://schema.org",
+        "@type": "SportsEvent",
+        name: `${info.team1?.teamname ?? info.team1?.teamsname ?? ""} vs ${info.team2?.teamname ?? info.team2?.teamsname ?? ""}`,
+        sport: "Cricket",
+        location: {
+          "@type": "Place",
+          name: info.venueinfo?.ground || "IPL 2026 Venue",
+          address: { "@type": "PostalAddress", addressCountry: "IN", ...(info.venueinfo?.city ? { addressLocality: info.venueinfo.city } : {}) },
+        },
+        competitor: [
+          { "@type": "SportsTeam", name: info.team1?.teamname || info.team1?.teamsname || "", sport: "Cricket" },
+          { "@type": "SportsTeam", name: info.team2?.teamname || info.team2?.teamsname || "", sport: "Cricket" },
+        ],
+        organizer: { "@type": "SportsOrganization", name: "BCCI", alternateName: "IPL" },
+        eventStatus: isLive
+          ? "https://schema.org/EventScheduled"
+          : "https://schema.org/EventPostponed",
+        url: canonicalUrl,
+        description: info.matchdesc || undefined,
+      }
+    : null;
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <>
+      {sportsEventSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsEventSchema) }}
+        />
+      )}
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       {/* Match header */}
       {info && (
         <div className="rounded-xl p-6 text-center" style={{ background: "#12121A", border: "1px solid #2A2A3A" }}>
@@ -521,5 +553,6 @@ export default async function MatchPage({ params }: Props) {
         </div>
       )}
     </div>
+    </>
   );
 }

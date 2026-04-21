@@ -178,8 +178,56 @@ export default async function JobsCategoryPage({
   const { notifications, total } = await getNotifications(cat, query, currentPage);
   const totalPages = Math.max(1, Math.ceil(total / 12));
 
+  const BASE = `https://rizzjobs.in/jobs/${cat.slug}`;
+
+  const itemListSchema = notifications.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: `${cat.name} Job Notifications`,
+        itemListElement: notifications.slice(0, 10).map((n, idx) => ({
+          "@type": "ListItem",
+          position: idx + 1,
+          name: n.title,
+          url: `https://rizzjobs.in/exam/${n.slug || n.id}`,
+        })),
+      }
+    : null;
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: `What are the latest ${cat.name} job notifications in 2026?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `Find the latest ${cat.name} government job notifications on Rizz Jobs. ${cat.tagline || ""} Check eligibility, exam dates, and apply through official portals.`,
+        },
+      },
+      {
+        "@type": "Question",
+        name: `How to apply for ${cat.name} government jobs?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `To apply for ${cat.name} government jobs, visit Rizz Jobs for the latest notifications, check eligibility criteria, download the official notification PDF, and apply through the official recruitment portal before the deadline.`,
+        },
+      },
+    ],
+  };
+
   return (
-    <div className="min-h-screen bg-[#030712] text-white font-sans selection:bg-indigo-500/30">
+    <>
+      {currentPage > 1 && <link rel="prev" href={currentPage === 2 ? BASE : `${BASE}?page=${currentPage - 1}`} />}
+      {currentPage < totalPages && <link rel="next" href={`${BASE}?page=${currentPage + 1}`} />}
+      {itemListSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
+      )}
+      {currentPage === 1 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      )}
+      <div className="min-h-screen bg-[#030712] text-white font-sans selection:bg-indigo-500/30">
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full" />
@@ -296,5 +344,6 @@ export default async function JobsCategoryPage({
         )}
       </main>
     </div>
+    </>
   );
 }

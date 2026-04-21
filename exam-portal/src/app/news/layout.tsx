@@ -1,4 +1,15 @@
+import type { Metadata } from "next";
 import { Playfair_Display, IBM_Plex_Sans } from "next/font/google";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Finance & Business News India | Rizz Jobs",
+    template: "%s | Rizz Jobs News",
+  },
+  description:
+    "Latest Indian finance, business, markets, economy and startup news.",
+  openGraph: { siteName: "Rizz Jobs", locale: "en_IN", type: "website" },
+};
 import dynamic from "next/dynamic";
 import BreakingNewsBanner from "@/components/BreakingNewsBanner";
 import HeadlineTicker from "@/components/HeadlineTicker";

@@ -335,8 +335,30 @@ export default async function PlayerPage({ params }: Props) {
     if (b.t20) rankingEntries.push({ label: "T20 Bowl", value: `#${b.t20}`, accent: "#7DD3E8" });
   }
 
+  const canonicalUrl = `https://rizzjobs.in/cricket/ipl/players/${rawId}`;
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: info.name,
+    sport: "Cricket",
+    url: canonicalUrl,
+    ...(info.dob ? { birthDate: info.dob } : {}),
+    ...(info.birthPlace ? { birthPlace: { "@type": "Place", name: info.birthPlace } } : {}),
+    ...(info.iplTeam
+      ? { memberOf: { "@type": "SportsTeam", name: info.iplTeam.fullName, url: `https://rizzjobs.in/cricket/ipl/teams/${info.iplTeam.slug}` } }
+      : info.intlTeam
+      ? { memberOf: { "@type": "SportsTeam", name: info.intlTeam } }
+      : {}),
+    ...(info.role ? { hasOccupation: { "@type": "Occupation", name: info.role } } : {}),
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-5">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-5">
 
       {/* ── Hero ── */}
       <div className="rounded-2xl overflow-hidden" style={{ background: "#12121A", border: "1px solid #2A2A3A" }}>
@@ -609,6 +631,7 @@ export default async function PlayerPage({ params }: Props) {
         </p>
       )}
     </div>
+    </>
   );
 }
 

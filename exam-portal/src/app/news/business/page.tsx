@@ -74,6 +74,8 @@ export default async function BusinessNewsPage({ searchParams }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      {page > 1 && <link rel="prev" href={page === 2 ? BASE_URL : `${BASE_URL}?page=${page - 1}`} />}
+      {page < totalPages && <link rel="next" href={`${BASE_URL}?page=${page + 1}`} />}
       <div style={{ backgroundColor: "#070708", minHeight: "100vh" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8">
           <div className="flex items-end justify-between gap-4 mb-5">

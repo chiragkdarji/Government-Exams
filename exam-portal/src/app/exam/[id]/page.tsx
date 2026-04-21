@@ -506,6 +506,42 @@ export default async function ExamDetail({
         }}
       />
 
+      {/* 5. Event schema — for upcoming exams with a real exam date */}
+      {(() => {
+        if (!exam.exam_date) return null;
+        const examDate = new Date(exam.exam_date);
+        if (isNaN(examDate.getTime()) || examDate < new Date()) return null;
+        const eventSchema = {
+          "@context": "https://schema.org",
+          "@type": "Event",
+          name: exam.title,
+          startDate: examDate.toISOString().split("T")[0],
+          eventStatus: "https://schema.org/EventScheduled",
+          eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+          location: { "@type": "VirtualLocation", url: canonicalUrl },
+          organizer: {
+            "@type": "Organization",
+            name: exam.source,
+            url: exam.link || "https://india.gov.in",
+          },
+          offers: {
+            "@type": "Offer",
+            validThrough: exam.deadline || undefined,
+            url: exam.link || canonicalUrl,
+            price: typeof exam.details?.application_fee === "string"
+              ? exam.details.application_fee.replace(/[^\d]/g, "") || "0"
+              : "0",
+            priceCurrency: "INR",
+          },
+        };
+        return (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+          />
+        );
+      })()}
+
       <main className="max-w-5xl mx-auto px-6 py-12">
         <Link
           href="/"
