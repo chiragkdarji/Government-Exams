@@ -208,7 +208,7 @@ export default async function StatsPage({
   const base = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.rizzjobs.in";
   let players: StatRow[] = [];
   try {
-    const res = await fetch(`${base}/api/ipl/stats`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${base}/api/ipl/stats?type=${activeType}`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const data = await res.json();
       players = data?.[activeType]?.t20StatsList?.[0]?.values ?? [];

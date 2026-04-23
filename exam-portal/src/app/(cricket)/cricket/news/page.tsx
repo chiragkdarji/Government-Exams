@@ -5,7 +5,7 @@ import Image from "next/image";
 export const revalidate = 900;
 
 export const metadata: Metadata = {
-  title: "Cricket News – Latest Updates | CricScore",
+  title: "Cricket News – Latest Updates | Rizz Jobs",
   description:
     "Latest cricket news, match reports, player updates and series previews from around the world.",
 };
@@ -36,6 +36,17 @@ async function getNews(): Promise<NewsStory[]> {
   }
 }
 
+function timeAgo(pubTime: string | number | undefined): string {
+  if (!pubTime) return "";
+  const ms = Date.now() - Number(pubTime);
+  const minutes = Math.floor(ms / 60000);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 export default async function CricketNewsPage() {
   const stories = await getNews();
 
@@ -56,57 +67,49 @@ export default async function CricketNewsPage() {
           No news available
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-0">
           {stories.map((n) => {
-            const pubMs = n.pubTime ? Number(n.pubTime) : 0;
-            const pubDate =
-              pubMs > 0
-                ? new Date(pubMs).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })
-                : "";
+            const headline = (n.hline ?? n.headline ?? "") as string;
+            const ago = timeAgo(n.pubTime);
 
             return (
-              <Link key={n.id} href={`/ipl/news/${n.id}`}>
-                <div
-                  className="rounded-xl overflow-hidden h-full flex flex-col transition-all hover:border-[#FFB800]"
-                  style={{ background: "#12121A", border: "1px solid #2A2A3A" }}
-                >
-                  {n.imageId ? (
-                    <div className="relative w-full h-40 shrink-0">
-                      <Image
-                        src={`/api/ipl/image?id=${n.imageId}&type=news`}
-                        alt={(n.hline ?? n.headline ?? "") as string}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      className="w-full h-32 shrink-0 flex items-center justify-center text-2xl"
-                      style={{ background: "#1A1A26" }}
-                    >
-                      🏏
-                    </div>
-                  )}
-                  <div className="p-4 flex flex-col gap-2 flex-1">
-                    <p className="text-sm font-semibold leading-snug line-clamp-3" style={{ color: "#F0EDE8" }}>
-                      {(n.hline ?? n.headline) as string}
-                    </p>
-                    {n.intro && (
-                      <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "#5A566A" }}>
-                        {n.intro}
-                      </p>
-                    )}
-                    {pubDate && (
-                      <p className="text-xs mt-auto pt-1" style={{ color: "#5A566A" }}>
-                        {pubDate}
-                      </p>
-                    )}
+              <Link
+                key={n.id}
+                href={`/ipl/news/${n.id}`}
+                className="flex gap-3 group py-3"
+                style={{ borderBottom: "1px solid #1a1a22" }}
+              >
+                {/* Thumbnail */}
+                {n.imageId ? (
+                  <div className="relative w-24 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-[#12121A]">
+                    <Image
+                      src={`/api/ipl/image?id=${n.imageId}&type=news`}
+                      alt={headline}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-200"
+                      unoptimized
+                    />
                   </div>
+                ) : (
+                  <div
+                    className="w-24 h-16 flex-shrink-0 rounded-lg flex items-center justify-center text-xl"
+                    style={{ background: "#12121A" }}
+                  >
+                    🏏
+                  </div>
+                )}
+
+                {/* Text */}
+                <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
+                  <p
+                    className="text-sm font-semibold leading-snug line-clamp-3 group-hover:text-[#FFB800] transition-colors"
+                    style={{ color: "#F0EDE8" }}
+                  >
+                    {headline}
+                  </p>
+                  {ago && (
+                    <p className="text-[10px] mt-1" style={{ color: "#5A566A" }}>{ago}</p>
+                  )}
                 </div>
               </Link>
             );

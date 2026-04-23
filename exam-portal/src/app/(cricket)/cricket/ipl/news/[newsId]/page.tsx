@@ -123,9 +123,9 @@ export default async function NewsDetailPage({ params }: Props) {
     .map((item) => item.content)
     .filter((c): c is NonNullable<typeof c> => !!c);
 
-  const leftItems = relatedNews.slice(0, 5);
-  const rightItems = relatedNews.slice(5, 10);
-  const bottomItems = relatedNews.slice(10, 14);
+  const leftItems = relatedNews.slice(0, 10);
+  const rightItems = relatedNews.slice(10, 20);
+  const bottomItems = relatedNews.slice(20, 24);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -248,7 +248,7 @@ export default async function NewsDetailPage({ params }: Props) {
                 More IPL News
               </h2>
               <div className="space-y-4">
-                {relatedNews.slice(0, 6).map((n) => (
+                {relatedNews.slice(0, 10).map((n) => (
                   <SidebarItem key={n.id} {...n} />
                 ))}
               </div>

@@ -4,7 +4,17 @@ import NewsCard from "@/components/NewsCard";
 import NewsPagination from "@/components/NewsPagination";
 import MarketMovers from "@/components/MarketMovers";
 import WorldMarketsRow from "@/components/WorldMarketsRow";
+import IndianMarketsCards from "@/components/IndianMarketsCards";
+import FiiDiiSection from "@/components/FiiDiiSection";
+import CryptoCards from "@/components/CryptoCards";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const MarketMoversLazy   = dynamic(() => import("@/components/MarketMovers"),       { ssr: false });
+const WorldMarketsLazy   = dynamic(() => import("@/components/WorldMarketsRow"),    { ssr: false });
+const IndianMarketsLazy  = dynamic(() => import("@/components/IndianMarketsCards"), { ssr: false });
+const FiiDiiLazy         = dynamic(() => import("@/components/FiiDiiSection"),      { ssr: false });
+const CryptoCardsLazy    = dynamic(() => import("@/components/CryptoCards"),        { ssr: false });
 
 export const revalidate = 600;
 
@@ -45,9 +55,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     },
     alternates: {
       canonical,
-      types: {
-        "application/rss+xml": "https://rizzjobs.in/news/feed.xml",
-      },
+      types: { "application/rss+xml": "https://rizzjobs.in/news/feed.xml" },
     },
   };
 }
@@ -89,10 +97,7 @@ export default async function NewsPage({ searchParams }: Props) {
   };
 
   const todayLabel = new Date().toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
   return (
@@ -106,7 +111,7 @@ export default async function NewsPage({ searchParams }: Props) {
 
       <div style={{ backgroundColor: "#070708", minHeight: "100vh" }}>
 
-        {/* ── Page Header ─────────────────────────────────────────────── */}
+        {/* ── Page Header ───────────────────────────── */}
         <div
           className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-6 flex items-end justify-between gap-4"
           style={{ borderBottom: "1px solid #1e1e24" }}
@@ -122,7 +127,7 @@ export default async function NewsPage({ searchParams }: Props) {
                   <span style={{ color: "#f0a500" }}>&ldquo;{searchQuery}&rdquo;</span>
                 </>
               ) : (
-                "Finance \u0026 Business News"
+                "Finance & Business News"
               )}
             </h1>
             {searchQuery && (
@@ -143,14 +148,14 @@ export default async function NewsPage({ searchParams }: Props) {
         {articles && articles.length > 0 ? (
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-            {/* ── Hero Article ──────────────────────────────────────────── */}
+            {/* ── Hero Article ──────────────────────────── */}
             {articles[0] && (
               <div className="mt-6">
                 <NewsCard variant="hero" {...articles[0]} />
               </div>
             )}
 
-            {/* ── Featured 3 ────────────────────────────────────────────── */}
+            {/* ── Featured 3 ────────────────────────────── */}
             {articles.length > 1 && (
               <div className="grid grid-cols-1 sm:grid-cols-3 mt-8 gap-6">
                 {articles.slice(1, 4).map((article) => (
@@ -159,22 +164,45 @@ export default async function NewsPage({ searchParams }: Props) {
               </div>
             )}
 
-            {/* ── Market Data ───────────────────────────────────────────── */}
+            {/* ── Market Snapshot ───────────────────────── */}
             {!searchQuery && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-8">
-                <div className="lg:col-span-2">
-                  <WorldMarketsRow />
+              <div className="mt-10 space-y-3">
+
+                {/* Section label */}
+                <div className="flex items-center gap-3">
+                  <span
+                    className="text-[10px] font-black uppercase tracking-[0.22em]"
+                    style={{ color: "#f0a500" }}
+                  >
+                    Market Snapshot
+                  </span>
+                  <div className="flex-1" style={{ height: "1px", background: "#1e1e26" }} />
                 </div>
-                <div>
-                  <MarketMovers />
+
+                {/* Indian markets — full width */}
+                <IndianMarketsLazy />
+
+                {/* World Markets + Nifty Movers — 2/3 + 1/3 */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                  <div className="lg:col-span-2">
+                    <WorldMarketsLazy />
+                  </div>
+                  <div>
+                    <MarketMoversLazy />
+                  </div>
+                </div>
+
+                {/* Institutional Flow + Crypto — 1/2 + 1/2 */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  <FiiDiiLazy />
+                  <CryptoCardsLazy />
                 </div>
               </div>
             )}
 
-            {/* ── Latest section ────────────────────────────────────────── */}
+            {/* ── Latest section ────────────────────────── */}
             {articles.length > 4 && (
               <div className="mt-10">
-                {/* Section header */}
                 <div className="flex items-center gap-4 mb-2">
                   <span
                     style={{
@@ -192,7 +220,6 @@ export default async function NewsPage({ searchParams }: Props) {
                   <div className="flex-1" style={{ height: "1px", backgroundColor: "#1e1e26" }} />
                 </div>
 
-                {/* Two-column compact list */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
                   {articles.slice(4).map((article) => (
                     <NewsCard key={article.id} variant="compact" {...article} />
@@ -216,7 +243,6 @@ export default async function NewsPage({ searchParams }: Props) {
           </div>
         )}
 
-        {/* Bottom spacer */}
         <div className="pb-16" />
       </div>
     </>

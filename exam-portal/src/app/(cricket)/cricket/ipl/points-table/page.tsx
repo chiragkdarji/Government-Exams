@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import IplPointsTable from "@/components/ipl/IplPointsTable";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "IPL 2026 Points Table | Rizz Jobs",
@@ -13,7 +13,7 @@ export default async function PointsTablePage() {
 
   let ptRows: Parameters<typeof IplPointsTable>[0]["rows"] = [];
   try {
-    const res = await fetch(`${base}/api/ipl/series-data`, { next: { revalidate: 60 } });
+    const res = await fetch(`${base}/api/ipl/series-data`, { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
       // series-data now returns computed pointsTable: { teamId, teamSName, played, won, lost, nr, points }

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { CB_BASE, cbHeaders, IPL_SERIES_ID, IPL_TEAMS } from "@/lib/cricbuzz";
 
-const REVALIDATE = 60; // 1 min — updates fast after a match ends
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 interface MatchInfoRaw {
   matchId: number;
@@ -148,15 +147,15 @@ export async function GET() {
     const [seriesRes, upcomingRes, recentRes] = await Promise.all([
       fetch(`${CB_BASE}/series/v1/${IPL_SERIES_ID}`, {
         headers: cbHeaders(),
-        next: { revalidate: REVALIDATE },
+        cache: "no-store",
       }),
       fetch(`${CB_BASE}/matches/v1/upcoming`, {
         headers: cbHeaders(),
-        next: { revalidate: REVALIDATE },
+        cache: "no-store",
       }),
       fetch(`${CB_BASE}/matches/v1/recent`, {
         headers: cbHeaders(),
-        next: { revalidate: REVALIDATE },
+        cache: "no-store",
       }),
     ]);
 
@@ -211,9 +210,7 @@ export async function GET() {
         recent: recentMatches,
       },
       {
-        headers: {
-          "Cache-Control": `public, s-maxage=${REVALIDATE}, stale-while-revalidate=${REVALIDATE / 2}`,
-        },
+        headers: { "Cache-Control": "no-store" },
       }
     );
   } catch (err) {

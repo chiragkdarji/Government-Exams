@@ -12,6 +12,7 @@ import {
   Settings,
   X,
 } from "lucide-react";
+import NewsLatestTicker from "@/components/NewsLatestTicker";
 import { createBrowserClient } from "@supabase/ssr";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -347,6 +348,7 @@ export default function SiteHeader() {
                 </Link>
               );
             })}
+            {section === "news" && <NewsLatestTicker />}
           </div>
         </div>
       ) : null}

@@ -11,9 +11,7 @@ export const metadata: Metadata = {
   openGraph: { siteName: "Rizz Jobs", locale: "en_IN", type: "website" },
 };
 import BreakingNewsBanner from "@/components/BreakingNewsBanner";
-import HeadlineTicker from "@/components/HeadlineTicker";
 import BackToTop from "@/components/BackToTop";
-import NewsClientTickers from "@/components/NewsClientTickers";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -57,8 +55,6 @@ export default function NewsLayout({ children }: { children: React.ReactNode }) 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />
       <BreakingNewsBanner />
-      <NewsClientTickers />
-      <HeadlineTicker />
       {children}
       <BackToTop />
     </div>
