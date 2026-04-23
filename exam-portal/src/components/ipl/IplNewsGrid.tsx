@@ -83,7 +83,7 @@ export default function IplNewsGrid({ items }: { items: NewsItem[] }) {
         </div>
       )}
 
-      {items.length > 0 && (
+      {totalPages > 1 && (
         <p className="text-center text-xs mt-3" style={{ color: "#5A566A" }}>
           Page {page} of {totalPages} · {items.length} articles
         </p>
