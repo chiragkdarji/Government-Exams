@@ -11,7 +11,7 @@ interface Props {
 
 interface StoryItem {
   id: number | string;
-  hline?: string;
+  hline?: string;   // Cricbuzz API field
   headline?: string;
   intro?: string;
   imageId?: number;
@@ -50,7 +50,8 @@ async function fetchRelatedNews(excludeId: string, base: string): Promise<StoryI
   }
 }
 
-function SidebarItem({ id, headline, imageId, pubTime }: StoryItem) {
+function SidebarItem({ id, headline, hline, imageId, pubTime }: StoryItem) {
+  const title = hline ?? headline ?? "";
   const date = pubTime
     ? new Date(Number(pubTime)).toLocaleDateString("en-IN", {
         day: "numeric", month: "short", timeZone: "Asia/Kolkata",
@@ -62,7 +63,7 @@ function SidebarItem({ id, headline, imageId, pubTime }: StoryItem) {
         <div className="relative w-20 h-14 flex-shrink-0 rounded overflow-hidden bg-[#2A2A3A]">
           <Image
             src={`/api/ipl/image?id=${imageId}&type=news`}
-            alt={headline ?? ""}
+            alt={title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-200"
             unoptimized
@@ -73,7 +74,7 @@ function SidebarItem({ id, headline, imageId, pubTime }: StoryItem) {
       )}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium line-clamp-3 leading-snug group-hover:text-[#FFB800] transition-colors" style={{ color: "#F0EDE8" }}>
-          {headline}
+          {title}
         </p>
         {date && <p className="text-xs mt-1" style={{ color: "#5A566A" }}>{date}</p>}
       </div>
