@@ -55,7 +55,7 @@ export async function GET() {
       .from("ipl_news")
       .select("id, headline, intro, cover_image_id, publish_time")
       .order("publish_time", { ascending: false })
-      .limit(30);
+      .limit(60);
 
     // Shape into { storyList: [{ story: {...} }] } — same format pages expect
     const storyList = (dbNews ?? []).map((row) => ({
