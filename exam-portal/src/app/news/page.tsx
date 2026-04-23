@@ -2,19 +2,8 @@ import { Metadata } from "next";
 import { getSupabase } from "@/lib/supabase-server";
 import NewsCard from "@/components/NewsCard";
 import NewsPagination from "@/components/NewsPagination";
-import MarketMovers from "@/components/MarketMovers";
-import WorldMarketsRow from "@/components/WorldMarketsRow";
-import IndianMarketsCards from "@/components/IndianMarketsCards";
-import FiiDiiSection from "@/components/FiiDiiSection";
-import CryptoCards from "@/components/CryptoCards";
+import NewsMarketWidgets from "@/components/NewsMarketWidgets";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-const MarketMoversLazy   = dynamic(() => import("@/components/MarketMovers"),       { ssr: false });
-const WorldMarketsLazy   = dynamic(() => import("@/components/WorldMarketsRow"),    { ssr: false });
-const IndianMarketsLazy  = dynamic(() => import("@/components/IndianMarketsCards"), { ssr: false });
-const FiiDiiLazy         = dynamic(() => import("@/components/FiiDiiSection"),      { ssr: false });
-const CryptoCardsLazy    = dynamic(() => import("@/components/CryptoCards"),        { ssr: false });
 
 export const revalidate = 600;
 
@@ -165,40 +154,7 @@ export default async function NewsPage({ searchParams }: Props) {
             )}
 
             {/* ── Market Snapshot ───────────────────────── */}
-            {!searchQuery && (
-              <div className="mt-10 space-y-3">
-
-                {/* Section label */}
-                <div className="flex items-center gap-3">
-                  <span
-                    className="text-[10px] font-black uppercase tracking-[0.22em]"
-                    style={{ color: "#f0a500" }}
-                  >
-                    Market Snapshot
-                  </span>
-                  <div className="flex-1" style={{ height: "1px", background: "#1e1e26" }} />
-                </div>
-
-                {/* Indian markets — full width */}
-                <IndianMarketsLazy />
-
-                {/* World Markets + Nifty Movers — 2/3 + 1/3 */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                  <div className="lg:col-span-2">
-                    <WorldMarketsLazy />
-                  </div>
-                  <div>
-                    <MarketMoversLazy />
-                  </div>
-                </div>
-
-                {/* Institutional Flow + Crypto — 1/2 + 1/2 */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                  <FiiDiiLazy />
-                  <CryptoCardsLazy />
-                </div>
-              </div>
-            )}
+            {!searchQuery && <NewsMarketWidgets />}
 
             {/* ── Latest section ────────────────────────── */}
             {articles.length > 4 && (
