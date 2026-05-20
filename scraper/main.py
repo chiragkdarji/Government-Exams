@@ -546,6 +546,24 @@ async def run_refill(limit: int = 30, dry_run: bool = False):
     except Exception as e:
         print(f"  ⚠️  DB query for needs_url_review failed: {e}")
 
+    # Pick up notifications whose link is a Google search URL (stale from before Tier 5 was removed)
+    for google_pattern in ["google.com/search", "google.co.in/search"]:
+        try:
+            res = (
+                supabase.table("notifications")
+                .select("id, slug, title, source, exam_date, deadline, details, ai_summary, link, is_active, needs_url_review")
+                .eq("is_active", True)
+                .like("link", f"%{google_pattern}%")
+                .order("created_at", desc=True)
+                .limit(limit)
+                .execute()
+            )
+            for row in (res.data or []):
+                if not any(c["slug"] == row["slug"] for c in candidates):
+                    candidates.append(row)
+        except Exception as e:
+            print(f"  ⚠️  DB query for google-link jobs failed ({google_pattern}): {e}")
+
     # Sparse details
     try:
         res = (

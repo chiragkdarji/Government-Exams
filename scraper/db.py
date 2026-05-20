@@ -88,6 +88,7 @@ AGGREGATOR_DOMAINS = [
     "sarkari", "freejobalert", "jagranjosh", "testbook",
     "rojgar", "freshersworld", "employment", "naukri",
     "shine.com", "indeed", "timesjobs",
+    "google.com/search", "google.co.in/search",
 ]
 
 
