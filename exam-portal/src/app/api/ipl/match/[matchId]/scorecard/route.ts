@@ -38,7 +38,7 @@ export async function GET(
     }
 
     const raw = await res.json();
-    const normalized = normalizeScard(raw);
+    const normalized = normalizeScard(raw, matchId);
 
     const isLive = normalized.matchHeader?.state === "In Progress";
     const cacheTtl = isLive ? CACHE_LIVE : CACHE_COMPLETE;
@@ -112,7 +112,7 @@ interface NormalizedScard {
   innings: NormalizedInnings[];
 }
 
-function normalizeScard(raw: Record<string, unknown>): NormalizedScard {
+function normalizeScard(raw: Record<string, unknown>, matchId: string): NormalizedScard {
   const header    = (raw.matchHeader ?? {}) as Record<string, unknown>;
   const scardData = (raw.scoreCard ?? []) as RawInnings[];
 
