@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Play, AlertCircle, RefreshCw, CheckCircle } from "lucide-react";
+import { Play, AlertCircle, RefreshCw, CheckCircle, Newspaper } from "lucide-react";
 
 type ActionState = {
   running: boolean;
@@ -15,7 +15,9 @@ const idle: ActionState = { running: false, error: null, success: null };
 export default function ScraperPage() {
   const [scrape, setScrape]   = useState<ActionState>(idle);
   const [refill, setRefill]   = useState<ActionState>(idle);
+  const [news, setNews]       = useState<ActionState>(idle);
   const [refillLimit, setRefillLimit] = useState(30);
+  const [newsLimit, setNewsLimit]     = useState(10);
 
   const handleTrigger = async () => {
     setScrape({ running: true, error: null, success: null });
@@ -30,6 +32,22 @@ export default function ScraperPage() {
       setTimeout(() => setScrape(idle), 6000);
     } catch (err) {
       setScrape({ running: false, error: err instanceof Error ? err.message : "Error", success: null });
+    }
+  };
+
+  const handleNewsScrape = async () => {
+    setNews({ running: true, error: null, success: null });
+    try {
+      const res  = await fetch(`/api/admin/news-scraper/trigger?limit=${newsLimit}`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setNews({ running: false, error: data.error || "Failed to trigger news scraper", success: null });
+        return;
+      }
+      setNews({ running: false, error: null, success: data.message || "News scraper triggered!" });
+      setTimeout(() => setNews(idle), 6000);
+    } catch (err) {
+      setNews({ running: false, error: err instanceof Error ? err.message : "Error", success: null });
     }
   };
 
@@ -97,11 +115,80 @@ export default function ScraperPage() {
 
         <button
           onClick={handleTrigger}
-          disabled={scrape.running || refill.running}
+          disabled={scrape.running || refill.running || news.running}
           className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Play className="w-4 h-4" />
           {scrape.running ? "Triggering…" : "Run Full Scrape"}
+        </button>
+      </div>
+
+      {/* ── News Scraper ─────────────────────────────────────────────────── */}
+      <div className="rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.02] border border-white/10 p-6 mb-5 space-y-5">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">News Scraper</p>
+          <p className="text-sm text-gray-400">
+            Pulls fresh finance & business articles from RSS feeds, enriches them with GPT-4o, and upserts to DB.
+          </p>
+        </div>
+
+        <ol className="space-y-2">
+          {[
+            "Fetches articles from 15+ RSS sources (ET, Moneycontrol, Mint, BS, NDTV Profit…)",
+            "Extracts full article text via trafilatura for accurate AI enrichment",
+            "GPT-4o rewrites with SEO title, summary, tags and fact-checks numbers",
+            "Upserts to news_articles — skips already-published slugs",
+          ].map((step, i) => (
+            <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
+                {i + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+
+        <div>
+          <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2">
+            Articles to enrich
+          </label>
+          <div className="flex gap-2">
+            {[5, 10, 20, 50].map((n) => (
+              <button
+                key={n}
+                onClick={() => setNewsLimit(n)}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                  newsLimit === n
+                    ? "bg-emerald-600 text-white border border-emerald-500"
+                    : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {news.error && (
+          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            {news.error}
+          </div>
+        )}
+        {news.success && (
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 shrink-0" />
+            {news.success}
+          </div>
+        )}
+
+        <button
+          onClick={handleNewsScrape}
+          disabled={news.running || scrape.running || refill.running}
+          className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Newspaper className={`w-4 h-4 ${news.running ? "animate-pulse" : ""}`} />
+          {news.running ? "Triggering…" : `Run News Scraper (${newsLimit} articles)`}
         </button>
       </div>
 
@@ -169,7 +256,7 @@ export default function ScraperPage() {
 
         <button
           onClick={handleRefill}
-          disabled={refill.running || scrape.running}
+          disabled={refill.running || scrape.running || news.running}
           className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RefreshCw className={`w-4 h-4 ${refill.running ? "animate-spin" : ""}`} />
