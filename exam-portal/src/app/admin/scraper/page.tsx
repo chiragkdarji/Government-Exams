@@ -12,18 +12,107 @@ type ActionState = {
 
 const idle: ActionState = { running: false, error: null, success: null };
 
+const PRESET_OPTIONS = [5, 10, 15, 20] as const;
+
+function LimitPicker({
+  label,
+  value,
+  onChange,
+  customValue,
+  onCustomChange,
+  accentClass,
+  includeAll = false,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  customValue: string;
+  onCustomChange: (v: string) => void;
+  accentClass: string;
+  includeAll?: boolean;
+}) {
+  const isCustom = value === -1;
+  return (
+    <div>
+      <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2">
+        {label}
+      </label>
+      <div className="flex flex-wrap gap-2">
+        {includeAll && (
+          <button
+            onClick={() => onChange(0)}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+              value === 0
+                ? `${accentClass} text-white`
+                : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
+            }`}
+          >
+            All
+          </button>
+        )}
+        {PRESET_OPTIONS.map((n) => (
+          <button
+            key={n}
+            onClick={() => onChange(n)}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+              value === n
+                ? `${accentClass} text-white`
+                : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
+            }`}
+          >
+            {n}
+          </button>
+        ))}
+        <button
+          onClick={() => onChange(-1)}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+            isCustom
+              ? `${accentClass} text-white`
+              : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
+          }`}
+        >
+          Custom
+        </button>
+      </div>
+      {isCustom && (
+        <input
+          type="number"
+          min={1}
+          max={500}
+          value={customValue}
+          onChange={(e) => onCustomChange(e.target.value)}
+          placeholder="Enter number…"
+          className="mt-2 w-36 px-3 py-2 rounded-xl text-sm font-bold bg-white/5 border border-white/20 text-white placeholder-gray-600 focus:outline-none focus:border-white/40"
+        />
+      )}
+    </div>
+  );
+}
+
 export default function ScraperPage() {
-  const [scrape, setScrape]   = useState<ActionState>(idle);
-  const [refill, setRefill]   = useState<ActionState>(idle);
-  const [news, setNews]       = useState<ActionState>(idle);
+  const [scrape, setScrape] = useState<ActionState>(idle);
+  const [refill, setRefill] = useState<ActionState>(idle);
+  const [news, setNews]     = useState<ActionState>(idle);
+
   const [scrapeLimit, setScrapeLimit] = useState(0);
-  const [refillLimit, setRefillLimit] = useState(30);
-  const [newsLimit, setNewsLimit]     = useState(10);
+  const [scrapeCustom, setScrapeCustom] = useState("25");
+
+  const [newsLimit, setNewsLimit] = useState(10);
+  const [newsCustom, setNewsCustom] = useState("25");
+
+  const [refillLimit, setRefillLimit] = useState(10);
+  const [refillCustom, setRefillCustom] = useState("25");
+
+  const effectiveScrapeLimit = scrapeLimit === -1 ? (parseInt(scrapeCustom) || 0) : scrapeLimit;
+  const effectiveNewsLimit   = newsLimit === -1   ? (parseInt(newsCustom)   || 10) : newsLimit;
+  const effectiveRefillLimit = refillLimit === -1 ? (parseInt(refillCustom) || 10) : refillLimit;
+
+  const anyRunning = scrape.running || refill.running || news.running;
 
   const handleTrigger = async () => {
     setScrape({ running: true, error: null, success: null });
     try {
-      const res  = await fetch(`/api/admin/scraper/trigger?limit=${scrapeLimit}`, { method: "POST" });
+      const res  = await fetch(`/api/admin/scraper/trigger?limit=${effectiveScrapeLimit}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         setScrape({ running: false, error: data.error || "Failed to trigger scraper", success: null });
@@ -39,7 +128,7 @@ export default function ScraperPage() {
   const handleNewsScrape = async () => {
     setNews({ running: true, error: null, success: null });
     try {
-      const res  = await fetch(`/api/admin/news-scraper/trigger?limit=${newsLimit}`, { method: "POST" });
+      const res  = await fetch(`/api/admin/news-scraper/trigger?limit=${effectiveNewsLimit}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         setNews({ running: false, error: data.error || "Failed to trigger news scraper", success: null });
@@ -55,7 +144,7 @@ export default function ScraperPage() {
   const handleRefill = async () => {
     setRefill({ running: true, error: null, success: null });
     try {
-      const res  = await fetch(`/api/admin/scraper/refill?limit=${refillLimit}`, { method: "POST" });
+      const res  = await fetch(`/api/admin/scraper/refill?limit=${effectiveRefillLimit}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         setRefill({ running: false, error: data.error || "Failed to trigger refill", success: null });
@@ -89,7 +178,7 @@ export default function ScraperPage() {
           {[
             "Scrapes 9 sources (aggregators + direct gov portals)",
             "AI deep-researches each notification",
-            "Validates every URL — fixes 404s via DuckDuckGo",
+            "Validates every URL — fixes 404s via Serper.dev",
             "Upserts to database (smart-merge, never loses data)",
           ].map((step, i) => (
             <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
@@ -101,26 +190,15 @@ export default function ScraperPage() {
           ))}
         </ol>
 
-        <div>
-          <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2">
-            Notifications to research
-          </label>
-          <div className="flex gap-2">
-            {[0, 10, 25, 50].map((n) => (
-              <button
-                key={n}
-                onClick={() => setScrapeLimit(n)}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                  scrapeLimit === n
-                    ? "bg-indigo-600 text-white border border-indigo-500"
-                    : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
-                }`}
-              >
-                {n === 0 ? "All" : n}
-              </button>
-            ))}
-          </div>
-        </div>
+        <LimitPicker
+          label="Notifications to research"
+          value={scrapeLimit}
+          onChange={setScrapeLimit}
+          customValue={scrapeCustom}
+          onCustomChange={setScrapeCustom}
+          accentClass="bg-indigo-600 border border-indigo-500"
+          includeAll
+        />
 
         {scrape.error && (
           <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-2">
@@ -137,11 +215,15 @@ export default function ScraperPage() {
 
         <button
           onClick={handleTrigger}
-          disabled={scrape.running || refill.running || news.running}
+          disabled={anyRunning}
           className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Play className="w-4 h-4" />
-          {scrape.running ? "Triggering…" : scrapeLimit === 0 ? "Run Full Scrape" : `Run Full Scrape (${scrapeLimit})`}
+          {scrape.running
+            ? "Triggering…"
+            : effectiveScrapeLimit === 0
+            ? "Run Full Scrape"
+            : `Run Full Scrape (${effectiveScrapeLimit})`}
         </button>
       </div>
 
@@ -157,8 +239,8 @@ export default function ScraperPage() {
         <ol className="space-y-2">
           {[
             "Fetches articles from 15+ RSS sources (ET, Moneycontrol, Mint, BS, NDTV Profit…)",
-            "Extracts full article text via trafilatura for accurate AI enrichment",
-            "GPT-4o rewrites with SEO title, summary, tags and fact-checks numbers",
+            "Extracts full article text via trafilatura for grounded AI enrichment",
+            "GPT-4o rewrites with journalism structure — lead, quotes, context, conclusion",
             "Upserts to news_articles — skips already-published slugs",
           ].map((step, i) => (
             <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
@@ -170,26 +252,14 @@ export default function ScraperPage() {
           ))}
         </ol>
 
-        <div>
-          <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2">
-            Articles to enrich
-          </label>
-          <div className="flex gap-2">
-            {[5, 10, 20, 50].map((n) => (
-              <button
-                key={n}
-                onClick={() => setNewsLimit(n)}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                  newsLimit === n
-                    ? "bg-emerald-600 text-white border border-emerald-500"
-                    : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
-                }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
+        <LimitPicker
+          label="Articles to enrich"
+          value={newsLimit}
+          onChange={setNewsLimit}
+          customValue={newsCustom}
+          onCustomChange={setNewsCustom}
+          accentClass="bg-emerald-600 border border-emerald-500"
+        />
 
         {news.error && (
           <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-2">
@@ -206,11 +276,11 @@ export default function ScraperPage() {
 
         <button
           onClick={handleNewsScrape}
-          disabled={news.running || scrape.running || refill.running}
+          disabled={anyRunning}
           className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Newspaper className={`w-4 h-4 ${news.running ? "animate-pulse" : ""}`} />
-          {news.running ? "Triggering…" : `Run News Scraper (${newsLimit} articles)`}
+          {news.running ? "Triggering…" : `Run News Scraper (${effectiveNewsLimit} articles)`}
         </button>
       </div>
 
@@ -241,27 +311,14 @@ export default function ScraperPage() {
           ))}
         </ol>
 
-        {/* Limit selector */}
-        <div>
-          <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2">
-            Notifications to refill
-          </label>
-          <div className="flex gap-2">
-            {[10, 30, 50, 100].map((n) => (
-              <button
-                key={n}
-                onClick={() => setRefillLimit(n)}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                  refillLimit === n
-                    ? "bg-cyan-600 text-white border border-cyan-500"
-                    : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
-                }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
+        <LimitPicker
+          label="Notifications to refill"
+          value={refillLimit}
+          onChange={setRefillLimit}
+          customValue={refillCustom}
+          onCustomChange={setRefillCustom}
+          accentClass="bg-cyan-600 border border-cyan-500"
+        />
 
         {refill.error && (
           <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-2">
@@ -278,11 +335,11 @@ export default function ScraperPage() {
 
         <button
           onClick={handleRefill}
-          disabled={refill.running || scrape.running || news.running}
+          disabled={anyRunning}
           className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RefreshCw className={`w-4 h-4 ${refill.running ? "animate-spin" : ""}`} />
-          {refill.running ? "Triggering…" : `Refill ${refillLimit} Notifications`}
+          {refill.running ? "Triggering…" : `Refill ${effectiveRefillLimit} Notifications`}
         </button>
       </div>
 
@@ -290,7 +347,7 @@ export default function ScraperPage() {
       <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm">
         <p className="font-bold mb-1">Note</p>
         <p>
-          Both actions run asynchronously on the scraper server and may take several minutes.
+          All actions run asynchronously on the scraper server and may take several minutes.
           Check <Link href="/admin/scraper-logs" className="underline hover:text-amber-200">Scraper Logs</Link> for progress.
         </p>
       </div>

@@ -501,8 +501,7 @@ def fetch_existing_data(supabase: Client) -> tuple[set, set]:
 
 
 # ── AI Enrichment ─────────────────────────────────────────────────────────────
-ENRICH_PROMPT = """You are an authoritative Indian financial journalist for Rizz Jobs.
-Given the original article content, produce a JSON response with the following fields.
+ENRICH_PROMPT = """You are a senior editor at a premium Indian financial publication. Write this story in professional journalism structure.
 
 {full_text_block}
 Headline: {headline}
@@ -510,41 +509,50 @@ Source: {source_name}
 Original URL: {original_url}
 Suggested category: {source_category}
 
-CATEGORY DEFINITIONS (pick the single best fit — do NOT default to "markets"):
+CATEGORY DEFINITIONS (pick the single best fit):
 - finance:  personal finance, banking, insurance, mutual funds, loans, RBI policy, credit, FD/savings
 - business: corporate earnings, company results, M&A, industry news, CEO/leadership, supply chain
 - economy:  GDP, inflation, government budget, fiscal policy, trade balance, manufacturing, employment
-- markets:  ONLY use for Nifty/Sensex levels, stock price movements, IPO listings, F&O, commodity/currency trading
+- markets:  ONLY for Nifty/Sensex levels, stock price movements, IPO listings, F&O, commodity/currency trading
 - startups: funding rounds, unicorn valuations, new product launches, Indian tech startups, VC/PE deals
-- ipl:      Indian Premier League cricket — match results, player performance, team standings, auction news, IPL 2026
+- ipl:      Indian Premier League cricket — match results, player performance, team standings, auction news
 
-INSTRUCTIONS:
-1. REWRITE the article in a unique, authoritative journalistic voice (300-500 words).
-   BASE YOUR REWRITE ON THE ORIGINAL ARTICLE TEXT PROVIDED ABOVE — do not invent facts.
-   Preserve ALL numeric values (figures, percentages, dates) from the original exactly.
-   Add context, market implications, and analysis relevant to Indian investors and business readers.
-2. Generate a 2-3 sentence summary for article preview cards.
-3. Assign a category using the definitions above.
-4. Generate SEO metadata:
-   - meta_title: ≤60 characters, keyword-rich
-   - meta_description: ≤160 characters, action-oriented
-   - meta_keywords: 6-10 comma-separated keywords
-5. Generate 5-8 short tag phrases (e.g. "RBI rate cut", "Nifty 50", "SBI quarterly results")
-6. Generate descriptive image alt text (no 'AI-generated' language)
-7. Keep the headline clean: 60-80 characters, keyword-rich, no clickbait
+JOURNALISM STRUCTURE — write each section as specified:
+1. dateline: The city this story originates from, in ALL CAPS (e.g. "MUMBAI", "NEW DELHI", "BENGALURU"). Single word or short phrase only.
+2. lead: 1-2 sentences (40-80 words) answering WHO, WHAT, WHEN, WHERE, WHY, HOW. This is the most important paragraph — summarise the entire story in it.
+3. body: Array of 4-6 paragraphs in inverted pyramid order (most important details first). Each paragraph develops exactly one idea. Preserve ALL numeric values (figures, percentages, dates) from the original exactly. No invented facts.
+4. quotes: Array of 1-3 direct quotes from NAMED sources mentioned in the original article. Each quote must be properly attributed. If the original has no quotes, return an empty array — do NOT fabricate quotes.
+5. context: One paragraph of background — prior developments, historical context, or market implications that help readers understand why this story matters.
+6. conclusion: One forward-looking paragraph — implications, what to watch next, or a brief wrap-up. Does not repeat lead.
+
+ALSO produce:
+- content: the full article text assembled as: lead + "\n\n" + body paragraphs joined with "\n\n" + "\n\n" + conclusion (for backward compatibility)
+- summary: 2-3 sentence preview for article cards
+- headline: 60-80 characters, keyword-rich, no clickbait
+- tags: 5-8 short tag phrases (e.g. "RBI rate cut", "Nifty 50", "SBI quarterly results")
+- image_alt: descriptive alt text (no 'AI-generated' language)
+- seo: {{ meta_title (≤60 chars), meta_description (≤160 chars), meta_keywords (6-10 comma-separated) }}
 
 Respond with ONLY valid JSON (no markdown fences):
 {{
-  "headline": "improved headline (60-80 chars)",
-  "content": "rewritten article (300-500 words, grounded in original facts)",
+  "headline": "60-80 chars",
+  "content": "full article text (lead + body + conclusion)",
   "summary": "2-3 sentence preview",
   "category": "finance|business|economy|markets|startups|ipl",
-  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
+  "tags": ["tag1", "tag2"],
   "image_alt": "descriptive alt text",
   "seo": {{
     "meta_title": "≤60 chars",
     "meta_description": "≤160 chars",
     "meta_keywords": "kw1, kw2, kw3"
+  }},
+  "article_structure": {{
+    "dateline": "CITY NAME",
+    "lead": "Lead paragraph...",
+    "body": ["Paragraph 1", "Paragraph 2", "Paragraph 3", "Paragraph 4"],
+    "quotes": [{{"text": "Quote text here", "source": "Full Name, Title/Organisation"}}],
+    "context": "Background context paragraph...",
+    "conclusion": "Forward-looking conclusion..."
   }}
 }}"""
 
@@ -598,6 +606,7 @@ def enrich_article_with_gpt4o(raw: dict, client: OpenAI, full_text: str = "") ->
             "tags": enriched.get("tags", []),
             "image_alt": enriched.get("image_alt", ""),
             "seo": enriched.get("seo", {}),
+            "article_structure": enriched.get("article_structure"),
             "slug_base": slug_base,
             "published_at": raw["published_at"],
             "source_name": raw["source_name"],
@@ -702,6 +711,7 @@ def upsert_articles(articles: list[dict], supabase: Client) -> int:
             "image_alt": a.get("image_alt") or "",
             "tags": a.get("tags", []),
             "seo": a.get("seo", {}),
+            "article_structure": a.get("article_structure"),
             "is_published": True,
         }
         try:

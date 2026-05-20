@@ -11,6 +11,15 @@ import NewsViewTracker from "@/components/NewsViewTracker";
 
 export const revalidate = 3600;
 
+interface ArticleStructure {
+  dateline?: string;
+  lead?: string;
+  body?: string[];
+  quotes?: Array<{ text: string; source: string }>;
+  context?: string;
+  conclusion?: string;
+}
+
 interface Article {
   id: string;
   slug: string;
@@ -32,6 +41,7 @@ interface Article {
     meta_description?: string;
     meta_keywords?: string;
   };
+  article_structure?: ArticleStructure | null;
 }
 
 const CATEGORY_ACCENT: Record<string, string> = {
@@ -213,6 +223,7 @@ export default async function ArticlePage({
   };
 
   const paragraphs = article.content.split("\n\n").filter(Boolean);
+  const structure = article.article_structure ?? null;
 
   return (
     <>
@@ -275,6 +286,15 @@ export default async function ArticlePage({
             {article.headline}
           </h1>
 
+          {/* Dateline */}
+          {structure?.dateline && (
+            <p className="text-[12px] uppercase tracking-[0.18em] font-bold mb-3" style={{ color: "#7c7888" }}>
+              <span style={{ color: accent }}>{structure.dateline}</span>
+              <span style={{ color: "#2a2838" }}> — </span>
+              {formattedDate}
+            </p>
+          )}
+
           {/* Byline */}
           <div
             className="flex items-center flex-wrap gap-x-4 gap-y-1 py-4 mb-8"
@@ -284,10 +304,14 @@ export default async function ArticlePage({
               Rizz Jobs News Desk
             </span>
             <span style={{ color: "#2a2838" }}>·</span>
-            <time dateTime={article.published_at} className="text-[#7c7888] text-[12px] uppercase tracking-wide">
-              {formattedDate}
-            </time>
-            <span style={{ color: "#2a2838" }}>·</span>
+            {!structure?.dateline && (
+              <>
+                <time dateTime={article.published_at} className="text-[#7c7888] text-[12px] uppercase tracking-wide">
+                  {formattedDate}
+                </time>
+                <span style={{ color: "#2a2838" }}>·</span>
+              </>
+            )}
             <span className="text-[#7c7888] text-[12px]">{readTime} min read</span>
           </div>
 
@@ -322,20 +346,96 @@ export default async function ArticlePage({
 
           {/* Article Body */}
           <article className="mb-8">
-            {paragraphs.map((paragraph, i) => (
-              <p
-                key={i}
-                className="leading-[1.85] mb-5"
-                style={{
-                  color: i === 0 ? "#d4cfc7" : "#9a9699",
-                  fontFamily: i === 0 ? "'DM Serif Display', 'Georgia', serif" : undefined,
-                  fontWeight: i === 0 ? 400 : undefined,
-                  fontSize: i === 0 ? "1.15rem" : "1rem",
-                }}
-              >
-                {paragraph}
-              </p>
-            ))}
+            {structure ? (
+              <>
+                {/* Lead paragraph */}
+                {structure.lead && (
+                  <p
+                    className="leading-[1.85] mb-6"
+                    style={{
+                      color: "#d4cfc7",
+                      fontFamily: "'DM Serif Display', 'Georgia', serif",
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    {structure.lead}
+                  </p>
+                )}
+
+                {/* Body paragraphs with quotes interspersed */}
+                {(structure.body ?? []).map((para, i) => {
+                  const quote = structure.quotes?.[Math.floor(i / 2)];
+                  const showQuote = i % 2 === 1 && !!quote;
+                  return (
+                    <div key={i}>
+                      <p className="leading-[1.85] mb-5" style={{ color: "#9a9699", fontSize: "1rem" }}>
+                        {para}
+                      </p>
+                      {showQuote && quote && (
+                        <blockquote
+                          className="my-6 pl-5 py-1"
+                          style={{ borderLeft: `3px solid ${accent}` }}
+                        >
+                          <p
+                            className="leading-relaxed mb-2 italic"
+                            style={{
+                              color: "#c8c4bc",
+                              fontFamily: "'DM Serif Display', 'Georgia', serif",
+                              fontSize: "1.1rem",
+                            }}
+                          >
+                            &ldquo;{quote.text}&rdquo;
+                          </p>
+                          <cite
+                            className="text-[11px] uppercase tracking-[0.15em] font-bold not-italic"
+                            style={{ color: accent }}
+                          >
+                            {quote.source}
+                          </cite>
+                        </blockquote>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Context / Background box */}
+                {structure.context && (
+                  <div
+                    className="my-7 p-5"
+                    style={{ backgroundColor: "#0d0d10", border: "1px solid #1e1e24", borderLeftWidth: "3px", borderLeftColor: "#2a2838" }}
+                  >
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: "#4a4860" }}>
+                      Background
+                    </p>
+                    <p className="leading-[1.8] text-[0.95rem]" style={{ color: "#7c7888" }}>
+                      {structure.context}
+                    </p>
+                  </div>
+                )}
+
+                {/* Conclusion */}
+                {structure.conclusion && (
+                  <p className="leading-[1.85] mb-5" style={{ color: "#9a9699", fontSize: "1rem" }}>
+                    {structure.conclusion}
+                  </p>
+                )}
+              </>
+            ) : (
+              // Fallback: flat content for older articles
+              paragraphs.map((paragraph, i) => (
+                <p
+                  key={i}
+                  className="leading-[1.85] mb-5"
+                  style={{
+                    color: i === 0 ? "#d4cfc7" : "#9a9699",
+                    fontFamily: i === 0 ? "'DM Serif Display', 'Georgia', serif" : undefined,
+                    fontSize: i === 0 ? "1.15rem" : "1rem",
+                  }}
+                >
+                  {paragraph}
+                </p>
+              ))
+            )}
           </article>
 
           {/* ── Share Bar ────────────────────────────────────────────── */}
