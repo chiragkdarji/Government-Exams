@@ -98,7 +98,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Paginate news articles — no 500-item cap, fetch all in batches
-  let newsArticleUrls: MetadataRoute.Sitemap = [];
+  const newsArticleUrls: MetadataRoute.Sitemap = [];
   try {
     let offset = 0;
     const batchSize = 1000;
