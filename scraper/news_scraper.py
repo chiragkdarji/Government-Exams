@@ -720,7 +720,7 @@ def upsert_articles(articles: list[dict], supabase: Client) -> int:
     """Upsert enriched articles to news_articles table. Returns count inserted."""
     inserted = 0
     for a in articles:
-        row = {
+        base_row = {
             "slug": a["slug"],
             "headline": a["headline"],
             "content": a["content"],
@@ -735,31 +735,34 @@ def upsert_articles(articles: list[dict], supabase: Client) -> int:
             "image_alt": a.get("image_alt") or "",
             "tags": a.get("tags", []),
             "seo": a.get("seo", {}),
-            "article_structure": a.get("article_structure"),
             "is_published": True,
         }
+        structure = a.get("article_structure")
+        row = {**base_row, "article_structure": structure} if structure is not None else base_row
         try:
             supabase.table("news_articles").upsert(
                 row, on_conflict="slug", returning="minimal"
             ).execute()
             inserted += 1
         except Exception as e:
-            print(f"  ✗  Upsert failed for '{a['headline'][:50]}': {e}")
+            err_str = str(e)
+            # article_structure column doesn't exist yet — retry without it
+            if "article_structure" in err_str and structure is not None:
+                try:
+                    supabase.table("news_articles").upsert(
+                        base_row, on_conflict="slug", returning="minimal"
+                    ).execute()
+                    inserted += 1
+                    print(f"  ⚠  Saved without article_structure (run migration 20260520_news_article_structure.sql)")
+                except Exception as e2:
+                    print(f"  ✗  Upsert failed for '{a['headline'][:50]}': {e2}")
+            else:
+                print(f"  ✗  Upsert failed for '{a['headline'][:50]}': {e}")
     return inserted
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
-def main():
-    parser = argparse.ArgumentParser(description="Rizz Jobs News Scraper")
-    parser.add_argument("--limit", type=int, default=15,
-                        help="Max articles to enrich per run (default: 15)")
-    parser.add_argument("--no-banners", action="store_true",
-                        help="Skip banner generation (faster, lower cost)")
-    args = parser.parse_args()
-
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    openai_client = OpenAI(api_key=OPENAI_API_KEY)
-
+def _run(args, supabase: Client, openai_client: OpenAI) -> None:
     print(f"🗞  Rizz Jobs News Scraper — limit={args.limit}")
     if HAS_TRAFILATURA:
         print("   📄 trafilatura: available (full article extraction enabled)")
@@ -769,7 +772,6 @@ def main():
     # 1. Load active RSS sources from DB + extra hardcoded sources
     db_sources = fetch_news_sources(supabase)
     db_source_urls = {s["rss_url"] for s in db_sources}
-    # Add EXTRA_RSS_SOURCES only if not already in DB (avoid duplicates)
     extra_sources = [s for s in EXTRA_RSS_SOURCES if s["rss_url"] not in db_source_urls]
     sources = db_sources + extra_sources
     print(f"   {len(db_sources)} DB sources + {len(extra_sources)} extra sources = {len(sources)} total")
@@ -815,10 +817,8 @@ def main():
         headline = raw["headline"]
         if not headline:
             continue
-        # Skip if too similar to an existing DB headline
         if any(titles_are_similar(headline, h) for h in existing_headlines):
             continue
-        # Skip if too similar to another candidate in this run
         if any(titles_are_similar(headline, h) for h in seen_titles):
             continue
         seen_titles.append(headline)
@@ -827,13 +827,11 @@ def main():
     print(f"\n   {len(candidates)} unique new candidates after deduplication")
 
     # Balance candidates across categories so no single category dominates.
-    # Use source_category as a proxy (GPT-4o may adjust later).
-    # Each category gets at most ceil(limit / num_categories) slots.
     num_cats = len(NEWS_CATEGORIES)
     per_cat_limit = max(1, -(-args.limit // num_cats))  # ceiling division
     cat_counts: dict[str, int] = {c: 0 for c in NEWS_CATEGORIES}
     balanced: list[dict] = []
-    overflow: list[dict] = []  # articles whose category is already full
+    overflow: list[dict] = []
     for c in candidates:
         cat = c.get("source_category", "finance")
         if cat not in cat_counts:
@@ -843,7 +841,6 @@ def main():
             cat_counts[cat] += 1
         else:
             overflow.append(c)
-    # Fill remaining slots from overflow (maintains total = limit)
     remaining = args.limit - len(balanced)
     balanced.extend(overflow[:remaining])
     candidates = balanced[:args.limit]
@@ -880,7 +877,6 @@ def main():
             existing_slugs.add(slug)
             existing_headlines.add(enriched["headline"])
 
-            # Generate AI banner using source image as visual reference
             if generate_banners:
                 banner_url = generate_news_banner(
                     headline=enriched["headline"],
@@ -894,7 +890,6 @@ def main():
                     enriched["image_url"] = banner_url
                     enriched["image_alt"] = f"{enriched['headline']} — Rizz Jobs"
 
-            # Convert image to WebP ≤40KB and store in news-images bucket
             img_src = enriched.get("image_url") or raw.get("image_url")
             if img_src:
                 webp_url = process_image_to_webp(img_src, slug, supabase)
@@ -904,7 +899,7 @@ def main():
 
             enriched_articles.append(enriched)
 
-    # 7. Upsert to Supabase + log the run
+    # 8. Upsert to Supabase + log the run
     if enriched_articles:
         count = upsert_articles(enriched_articles, supabase)
         print(f"\n✅  Done: {count}/{len(enriched_articles)} articles upserted to news_articles")
@@ -920,6 +915,25 @@ def main():
     else:
         print("\n✅  Done: no new articles to insert")
         log_scraper_run(supabase, [])
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Rizz Jobs News Scraper")
+    parser.add_argument("--limit", type=int, default=15,
+                        help="Max articles to enrich per run (default: 15)")
+    parser.add_argument("--no-banners", action="store_true",
+                        help="Skip banner generation (faster, lower cost)")
+    args = parser.parse_args()
+
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    openai_client = OpenAI(api_key=OPENAI_API_KEY)
+
+    try:
+        _run(args, supabase, openai_client)
+    except Exception as e:
+        print(f"\n❌  News scraper crashed: {e}")
+        log_scraper_run(supabase, [], status="failed", error_message=str(e)[:500])
+        raise
 
 
 if __name__ == "__main__":
