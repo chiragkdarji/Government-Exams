@@ -700,7 +700,7 @@ def log_scraper_run(
 ) -> None:
     """Write a row to scraper_runs so the admin logs page shows news runs."""
     try:
-        supabase.table("scraper_runs").insert({
+        row: dict = {
             "scraper_type": "news",
             "total_synced": len(new_entries),
             "new_count": len(new_entries),
@@ -708,8 +708,10 @@ def log_scraper_run(
             "new_entries": new_entries,
             "updated_entries": [],
             "status": status,
-            "error_message": error_message,
-        }).execute()
+        }
+        if error_message is not None:
+            row["error_message"] = error_message
+        supabase.table("scraper_runs").insert(row).execute()
         print(f"📋 Run logged: {len(new_entries)} news articles upserted.")
     except Exception as log_err:
         print(f"⚠️  Could not write news scraper run log: {log_err}")
