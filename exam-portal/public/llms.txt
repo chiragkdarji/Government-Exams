@@ -1,77 +1,65 @@
 # Rizz Jobs
 
-> Real-time Indian Government Job Notifications, Exam Alerts & Recruitment Updates
+> India's premier platform for government job notifications, IPL cricket live scores, and Indian financial news.
 
-Rizz Jobs (https://rizzjobs.in) is a daily-updated portal covering every major government exam and recruitment drive in India. All notification data is sourced directly from official government portals (.gov.in, .nic.in) and verified before publication.
+Rizz Jobs (https://rizzjobs.in) aggregates and enriches government exam notifications from official Indian portals (UPSC, SSC, IBPS, EmploymentNews), provides real-time IPL 2026 cricket coverage via Cricbuzz, and publishes authoritative Indian financial news across six categories. All data is sourced from official government portals (.gov.in, .nic.in) and verified before publication.
 
-## What this site covers
+## Government Job Notifications
 
-- UPSC (Civil Services, NDA, CDS, CAPF, etc.)
-- SSC (CGL, CHSL, MTS, GD Constable, CPO, etc.)
-- Banking (IBPS PO/Clerk, SBI PO/Clerk, RBI, NABARD, etc.)
-- Railway (RRB NTPC, ALP, Group D, JE, etc.)
-- Defense & Police (Army, Navy, Air Force, CRPF, BSF, CISF, etc.)
-- Teaching (KVS, NVS, CTET, state TET, DSSSB, etc.)
-- Engineering (DRDO, ISRO, BARC, PSU technical roles)
-- Medical (AIIMS, NHM, ESIC, state health departments)
-- PSU (ONGC, BHEL, NTPC, SAIL, Coal India, etc.)
-- State Jobs (all major state PSC exams — UPPSC, BPSC, MPSC, RPSC, etc.)
-- 10th / 12th Pass (multi-tasking, constable, railway apprentice, etc.)
+- Job listings hub: https://rizzjobs.in/jobs
+- Banking jobs: https://rizzjobs.in/jobs/banking
+- Railway jobs: https://rizzjobs.in/jobs/railway
+- Defense / Police: https://rizzjobs.in/jobs/defense-police
+- UPSC / SSC: https://rizzjobs.in/jobs/upsc-ssc
+- Teaching jobs: https://rizzjobs.in/jobs/teaching
+- Engineering jobs: https://rizzjobs.in/jobs/engineering
+- Medical jobs: https://rizzjobs.in/jobs/medical
+- PSU jobs: https://rizzjobs.in/jobs/psu
+- State jobs: https://rizzjobs.in/jobs/state-jobs
+- 10th / 12th pass jobs: https://rizzjobs.in/jobs/10th-12th-pass
 
-## Content structure
+Each job notification page at /exam/{slug} contains: vacancy count and post-wise breakdown, eligibility criteria (education, age, experience), application fee by category (General/OBC/SC/ST/EWS), selection process, important dates, step-by-step how-to-apply instructions, and frequently asked questions.
 
-Each notification page includes:
-- Official link to the government portal
-- Vacancy count and post-wise breakdown
-- Important dates (application start/end, exam date, result date)
-- Eligibility criteria (education, age, experience)
-- Application fee by category (General, OBC, SC/ST, EWS)
-- Selection process steps
-- How to apply (step-by-step)
-- FAQs (common candidate questions with answers)
+Exam dates and deadlines are in YYYY-MM-DD format (IST timezone).
 
-## URL structure
+## Cricket / IPL 2026
 
-- Homepage (all notifications): https://rizzjobs.in/
-- Individual exam detail: https://rizzjobs.in/exam/[slug]
-- Category pages: https://rizzjobs.in/[category]
-  - /banking, /railway, /defense-police, /upsc-ssc, /teaching
-  - /engineering, /medical, /psu, /10th-12th-pass
-  - /admit-cards, /results, /state-jobs
-- Search: https://rizzjobs.in/?q=[query]
+Real-time IPL 2026 coverage powered by Cricbuzz:
+- IPL hub: https://rizzjobs.in/cricket/ipl
+- Live scores: https://rizzjobs.in/cricket/live
+- Points table: https://rizzjobs.in/cricket/ipl/points-table
+- Match schedule: https://rizzjobs.in/cricket/ipl/schedule
+- Orange Cap (batting leaders): https://rizzjobs.in/cricket/ipl/orange-cap
+- Purple Cap (bowling leaders): https://rizzjobs.in/cricket/ipl/purple-cap
+- IPL news: https://rizzjobs.in/cricket/ipl/news
+- All IPL teams: https://rizzjobs.in/cricket/ipl/teams
+- Match detail (live + scorecard): https://rizzjobs.in/cricket/ipl/match/{matchId}
+- Match commentary: https://rizzjobs.in/cricket/ipl/match/{matchId}/commentary
+- Player profiles: https://rizzjobs.in/cricket/ipl/players/{playerId}
+- International rankings: https://rizzjobs.in/cricket/rankings
+- Cricket records: https://rizzjobs.in/cricket/records
 
-## Data freshness
+IPL 2026 teams: Mumbai Indians, Chennai Super Kings, Royal Challengers Bengaluru, Kolkata Knight Riders, Sunrisers Hyderabad, Delhi Capitals, Punjab Kings, Rajasthan Royals, Lucknow Super Giants, Gujarat Titans.
 
-Content is scraped from official sources daily and enriched with AI research. Each notification page shows the last updated timestamp. Exam dates and deadlines are in YYYY-MM-DD format (IST timezone).
+## Financial News
+
+Indian financial and business news updated 4 times daily (sourced from Economic Times, Moneycontrol, Live Mint, Business Standard, NDTV Profit):
+- News hub: https://rizzjobs.in/news
+- Finance (banking, RBI policy, mutual funds, personal finance): https://rizzjobs.in/news/finance
+- Business (corporate earnings, M&A, CEO news): https://rizzjobs.in/news/business
+- Markets (Nifty, Sensex, IPO, F&O, commodity): https://rizzjobs.in/news/markets
+- Economy (GDP, inflation, budget, trade balance): https://rizzjobs.in/news/economy
+- Startups (funding rounds, unicorns, VC/PE deals): https://rizzjobs.in/news/startups
+
+Each article includes full body content, key takeaways, topic tags, and estimated read time.
 
 ## Sitemaps
 
-https://rizzjobs.in/sitemap.xml
-https://rizzjobs.in/news-sitemap.xml (Google News — last 48 hours)
+- Full sitemap: https://rizzjobs.in/sitemap.xml
 
-## News Module
+## About
 
-Rizz Jobs also publishes a Finance & Business News section at https://rizzjobs.in/news covering Indian markets, economy, startups, and corporate news.
-
-### News URL structure
-
-- News homepage: https://rizzjobs.in/news
-- News article: https://rizzjobs.in/news/[slug]
-- Category pages: https://rizzjobs.in/news/[category]
-  - /news/finance, /news/business, /news/markets, /news/economy, /news/startups
-- RSS feed: https://rizzjobs.in/news/feed.xml
-- Saved articles: https://rizzjobs.in/news/saved
-
-### News content
-
-Each article includes:
-- Full article body
-- Key takeaways / market briefing summary
-- Category and topic tags
-- Share links (WhatsApp, X, LinkedIn)
-- Estimated read time
-- Related articles in the same category
-
-### News freshness
-
-News articles are fetched from curated RSS sources every 6 hours, processed with AI enrichment, and published to the site. Google News sitemap updates hourly.
+- About: https://rizzjobs.in/about
+- Contact: https://rizzjobs.in/contact
+- Privacy Policy: https://rizzjobs.in/privacy
+- Terms of Service: https://rizzjobs.in/terms

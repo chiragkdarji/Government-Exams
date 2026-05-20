@@ -2,7 +2,7 @@ import os
 import json
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -326,6 +326,77 @@ def parse_exam_details(
 
     try:
         response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        print(f"  ❌ Error deep-researching {title}: {e}")
+        return {}
+
+
+def _build_research_prompt(
+    title: str,
+    discovery_snippet: str,
+    discovered_links: list,
+    categories: list,
+    official_page_text: str = "",
+) -> str:
+    """Build the GPT-4o prompt, optionally grounding it in official page text."""
+    links_context = ""
+    if discovered_links:
+        valid = [l for l in discovered_links if l and l.startswith("http")]
+        if valid:
+            links_context = (
+                "DISCOVERED LINKS FROM SCRAPED PAGES (check these first for official_link):\n"
+                + "\n".join(f"  - {l}" for l in valid)
+            )
+
+    if official_page_text:
+        links_context = (
+            "OFFICIAL PAGE CONTENT (primary source — use this as ground truth for ALL facts including\n"
+            "vacancy counts, dates, eligibility, fees, and selection process):\n"
+            f"{official_page_text[:20000]}\n\n"
+            + links_context
+        )
+
+    if categories:
+        category_names = [c["name"] for c in categories if c.get("name")]
+    else:
+        category_names = [
+            "10th / 12th Pass", "Banking", "Railway", "Defense / Police",
+            "UPSC / SSC", "Teaching", "Engineering", "Medical", "PSU", "State Jobs", "Other",
+        ]
+
+    return (
+        _DEEP_RESEARCH_TEMPLATE
+        .replace("@TITLE@", title)
+        .replace("@SNIPPET@", discovery_snippet or "")
+        .replace("@LINKS_CONTEXT@", links_context)
+        .replace("@CATEGORIES_LIST@", json.dumps(category_names))
+    )
+
+
+async def parse_exam_details_async(
+    async_client: AsyncOpenAI,
+    title: str,
+    discovery_snippet: str,
+    discovered_links: list = None,
+    categories: list = None,
+    official_page_text: str = "",
+) -> dict:
+    """
+    Async version of parse_exam_details for concurrent execution.
+    Accepts an optional official_page_text to ground AI output in real content
+    instead of relying on training data (eliminates hallucinated dates/facts).
+    """
+    print(f"  🔬 Deep-researching (async): {title}")
+    prompt = _build_research_prompt(
+        title, discovery_snippet, discovered_links or [], categories or [], official_page_text
+    )
+    try:
+        response = await async_client.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"},

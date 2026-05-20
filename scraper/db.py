@@ -367,10 +367,33 @@ def fetch_categories() -> list:
         ]
 
 
+def find_db_duplicate_by_title(title: str, threshold: float = 0.45) -> dict | None:
+    """
+    Use pg_trgm similarity search to detect near-duplicate notifications in DB.
+    Returns the closest matching record (slug + title) or None if no match found.
+
+    Requires the find_similar_notification() SQL function to be deployed
+    (see supabase/migrations/20260520_pg_trgm_dedup.sql).
+    """
+    try:
+        res = supabase.rpc(
+            "find_similar_notification",
+            {"search_title": title, "threshold": threshold}
+        ).execute()
+        if res.data:
+            return res.data[0]  # {id, slug, title, sim_score}
+        return None
+    except Exception as e:
+        print(f"  ⚠️  pg_trgm lookup failed (migration may not be applied): {e}")
+        return None
+
+
 def upsert_notifications(notifications):
     """
     Inserts or updates notifications in the database.
-    - New entries are inserted as-is.
+    - New entries are checked for pg_trgm near-duplicates before insert.
+      If a near-duplicate is found, the entry is merged into the existing record
+      (using that record's slug) instead of creating a new slug.
     - Existing entries are smart-merged (never loses data, only gains).
     - The scraper log records the actual field-level changes made.
     """
@@ -410,7 +433,24 @@ def upsert_notifications(notifications):
     for n in deduped_list:
         slug = n["slug"]
         if slug not in existing_by_slug:
-            # Brand new notification — insert as-is
+            # Not found by exact slug — check for near-duplicate via pg_trgm
+            similar = find_db_duplicate_by_title(n.get("title", ""))
+            if similar and similar["slug"] not in existing_by_slug:
+                # Fetch the actual near-duplicate record for merging
+                try:
+                    dup_res = supabase.table("notifications").select(
+                        "slug, title, link, ai_summary, exam_date, deadline, details"
+                    ).eq("slug", similar["slug"]).single().execute()
+                    if dup_res.data:
+                        existing_by_slug[similar["slug"]] = dup_res.data
+                        print(f"  🔀 pg_trgm: '{n['title'][:60]}' → merging into '{similar['title'][:60]}' (sim={similar.get('sim_score', 0):.2f})")
+                        n["slug"] = similar["slug"]
+                        slug = similar["slug"]
+                except Exception:
+                    pass
+
+        if slug not in existing_by_slug:
+            # Genuinely new notification — insert as-is
             final_list.append(n)
             new_entries.append({"title": n["title"], "slug": slug, "link": n.get("link", "")})
         else:

@@ -3,8 +3,11 @@ openai
 beautifulsoup4
 lxml
 requests
+httpx
 python-dotenv
 supabase
 google-genai
 Pillow
 feedparser
+trafilatura
+pydantic>=2.0

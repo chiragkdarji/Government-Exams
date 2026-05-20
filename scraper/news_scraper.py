@@ -23,6 +23,12 @@ from google.genai import types
 from openai import OpenAI
 from supabase import create_client, Client
 
+try:
+    import trafilatura
+    HAS_TRAFILATURA = True
+except ImportError:
+    HAS_TRAFILATURA = False
+
 # ── Config ────────────────────────────────────────────────────────────────────
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_KEY"]
@@ -338,6 +344,65 @@ def ensure_unique_slug(base_slug: str, existing_slugs: set) -> str:
     return f"{base_slug[:73]}-{suffix}"
 
 
+# ── Additional authoritative Indian financial RSS sources ─────────────────────
+# These supplement whatever is stored in the news_sources DB table.
+EXTRA_RSS_SOURCES = [
+    {"name": "Economic Times Markets",   "rss_url": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",            "category": "markets"},
+    {"name": "Moneycontrol Top News",    "rss_url": "https://www.moneycontrol.com/rss/MCtopnews.xml",                                 "category": "finance"},
+    {"name": "LiveMint Markets",         "rss_url": "https://www.livemint.com/rss/markets",                                            "category": "markets"},
+    {"name": "Business Standard Markets","rss_url": "https://www.business-standard.com/rss/markets-106.rss",                          "category": "markets"},
+    {"name": "NDTV Profit",              "rss_url": "https://feeds.feedburner.com/ndtvprofit-latest",                                   "category": "business"},
+    {"name": "Financial Express Economy","rss_url": "https://www.financialexpress.com/economy/feed/",                                  "category": "economy"},
+    {"name": "VCCircle Startups",        "rss_url": "https://www.vccircle.com/feed",                                                   "category": "startups"},
+    {"name": "Economic Times Startups",  "rss_url": "https://economictimes.indiatimes.com/tech/startups/rssfeeds/78570497.cms",        "category": "startups"},
+    {"name": "Cricbuzz IPL News",        "rss_url": "https://www.cricbuzz.com/cricket-news/index.xml",                                 "category": "ipl"},
+]
+
+
+# ── Full Article Text Extraction ──────────────────────────────────────────────
+
+def fetch_article_full_text(url: str) -> str:
+    """
+    Fetch and extract the main article text from a URL using trafilatura.
+    Returns clean, readable text stripped of navigation, ads, and boilerplate.
+    Falls back to a basic requests+BeautifulSoup extraction if trafilatura is unavailable.
+    """
+    if not url or not url.startswith("http"):
+        return ""
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; RizzJobsBot/1.0; +https://rizzjobs.in)"}
+        resp = requests.get(url, headers=headers, timeout=12, allow_redirects=True)
+        resp.raise_for_status()
+        html = resp.text
+        if HAS_TRAFILATURA:
+            text = trafilatura.extract(html, url=url, include_tables=True, include_links=False, no_fallback=False)
+            return (text or "")[:15000]
+        # Basic fallback
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html, "html.parser")
+        for tag in soup(["script", "style", "nav", "footer", "header", "aside"]):
+            tag.decompose()
+        return soup.get_text(separator="\n", strip=True)[:15000]
+    except Exception:
+        return ""
+
+
+def fact_check_numbers(original_text: str, rewritten_text: str) -> list[str]:
+    """
+    Check that key numeric values (financial figures, percentages, counts) from
+    the original article appear in the rewritten version. Returns list of numbers
+    that went missing -- these may indicate AI hallucination.
+    """
+    # Extract numbers with financial context (e.g. "₹1,200 crore", "12.5%", "2,456 points")
+    pattern = r'\b\d[\d,]*\.?\d*\s*(?:%|crore|lakh|billion|million|rs|₹|pts?|points?|bps|basis)?\b'
+    orig_nums = set(re.findall(pattern, original_text.lower()))
+    rewrit_nums = set(re.findall(pattern, rewritten_text.lower()))
+    missing = orig_nums - rewrit_nums
+    # Only flag numbers with financial significance (>= 3 chars, contains digit)
+    significant_missing = [n for n in missing if len(n) >= 3 and any(c.isdigit() for c in n)]
+    return significant_missing
+
+
 # ── Deduplication ─────────────────────────────────────────────────────────────
 def titles_are_similar(a: str, b: str) -> bool:
     return SequenceMatcher(None, a.lower(), b.lower()).ratio() >= SIMILARITY_THRESHOLD
@@ -437,12 +502,11 @@ def fetch_existing_data(supabase: Client) -> tuple[set, set]:
 
 # ── AI Enrichment ─────────────────────────────────────────────────────────────
 ENRICH_PROMPT = """You are an authoritative Indian financial journalist for Rizz Jobs.
-Given a raw news item, produce a JSON response with the following fields.
+Given the original article content, produce a JSON response with the following fields.
 
-RAW ARTICLE:
+{full_text_block}
 Headline: {headline}
 Source: {source_name}
-Snippet/Summary: {raw_summary}
 Original URL: {original_url}
 Suggested category: {source_category}
 
@@ -456,11 +520,11 @@ CATEGORY DEFINITIONS (pick the single best fit — do NOT default to "markets"):
 
 INSTRUCTIONS:
 1. REWRITE the article in a unique, authoritative journalistic voice (300-500 words).
-   Do NOT reproduce source text verbatim. Add context, market implications,
-   and analysis relevant to Indian investors and business readers.
+   BASE YOUR REWRITE ON THE ORIGINAL ARTICLE TEXT PROVIDED ABOVE — do not invent facts.
+   Preserve ALL numeric values (figures, percentages, dates) from the original exactly.
+   Add context, market implications, and analysis relevant to Indian investors and business readers.
 2. Generate a 2-3 sentence summary for article preview cards.
-3. Assign a category using the definitions above. Only use "markets" if the article
-   is specifically about stock/index price movements or trading activity.
+3. Assign a category using the definitions above.
 4. Generate SEO metadata:
    - meta_title: ≤60 characters, keyword-rich
    - meta_description: ≤160 characters, action-oriented
@@ -472,7 +536,7 @@ INSTRUCTIONS:
 Respond with ONLY valid JSON (no markdown fences):
 {{
   "headline": "improved headline (60-80 chars)",
-  "content": "rewritten article (300-500 words)",
+  "content": "rewritten article (300-500 words, grounded in original facts)",
   "summary": "2-3 sentence preview",
   "category": "finance|business|economy|markets|startups|ipl",
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
@@ -485,12 +549,28 @@ Respond with ONLY valid JSON (no markdown fences):
 }}"""
 
 
-def enrich_article_with_gpt4o(raw: dict, client: OpenAI) -> dict | None:
-    """Rewrite + categorize + generate SEO metadata via GPT-4o."""
+def enrich_article_with_gpt4o(raw: dict, client: OpenAI, full_text: str = "") -> dict | None:
+    """
+    Rewrite + categorize + generate SEO metadata via GPT-4o.
+    When full_text is provided (from trafilatura extraction), GPT-4o is grounded
+    in the actual article content instead of generating from memory.
+    A fact-check pass verifies key numeric values are preserved.
+    """
+    # Build the full-text block for the prompt
+    if full_text and len(full_text) > 100:
+        full_text_block = (
+            f"ORIGINAL ARTICLE TEXT (use as primary source — preserve all numbers exactly):\n"
+            f"{full_text[:10000]}\n\n"
+        )
+    else:
+        full_text_block = (
+            f"Snippet/Summary: {(raw.get('raw_summary') or '')[:800]}\n"
+        )
+
     prompt = ENRICH_PROMPT.format(
+        full_text_block=full_text_block,
         headline=raw["headline"],
         source_name=raw["source_name"],
-        raw_summary=(raw.get("raw_summary") or "")[:800],
         original_url=raw.get("original_url", ""),
         source_category=raw.get("source_category", "finance"),
     )
@@ -498,10 +578,16 @@ def enrich_article_with_gpt4o(raw: dict, client: OpenAI) -> dict | None:
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.4,
+            temperature=0.3,
             response_format={"type": "json_object"},
         )
         enriched = json.loads(response.choices[0].message.content)
+
+        # Fact-check: warn if key numbers from original are missing in rewrite
+        if full_text:
+            missing_nums = fact_check_numbers(full_text, enriched.get("content", ""))
+            if missing_nums:
+                print(f"  ⚠  Fact-check warning — {len(missing_nums)} numeric values may be missing in rewrite: {missing_nums[:5]}")
 
         slug_base = generate_slug(enriched.get("headline") or raw["headline"])
         return {
@@ -641,10 +727,18 @@ def main():
     openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
     print(f"🗞  Rizz Jobs News Scraper — limit={args.limit}")
+    if HAS_TRAFILATURA:
+        print("   📄 trafilatura: available (full article extraction enabled)")
+    else:
+        print("   ⚠  trafilatura not installed — using RSS summaries only (pip install trafilatura)")
 
-    # 1. Load active RSS sources from DB
-    sources = fetch_news_sources(supabase)
-    print(f"   {len(sources)} active RSS sources loaded from DB")
+    # 1. Load active RSS sources from DB + extra hardcoded sources
+    db_sources = fetch_news_sources(supabase)
+    db_source_urls = {s["rss_url"] for s in db_sources}
+    # Add EXTRA_RSS_SOURCES only if not already in DB (avoid duplicates)
+    extra_sources = [s for s in EXTRA_RSS_SOURCES if s["rss_url"] not in db_source_urls]
+    sources = db_sources + extra_sources
+    print(f"   {len(db_sources)} DB sources + {len(extra_sources)} extra sources = {len(sources)} total")
 
     # 2. Load existing data for deduplication
     existing_slugs, existing_headlines = fetch_existing_data(supabase)
@@ -722,17 +816,30 @@ def main():
     print(f"   Balanced selection: {cat_counts} (per-cat limit={per_cat_limit})")
     print(f"   Enriching {len(candidates)} articles with GPT-4o...\n")
 
-    # 6. Enrich each candidate + generate banner
+    # 6. Fetch full article text for grounded enrichment (best-effort, non-blocking)
+    print(f"\n   📄 Fetching full article text for {len(candidates)} candidates...")
+    for raw in candidates:
+        url = raw.get("original_url", "")
+        if url:
+            text = fetch_article_full_text(url)
+            raw["full_text"] = text
+            if text:
+                print(f"   ✓ {len(text)} chars extracted: {url[:60]}...")
+        else:
+            raw["full_text"] = ""
+
+    # 7. Enrich each candidate + generate banner
     generate_banners = not args.no_banners and bool(GEMINI_API_KEY)
     if generate_banners:
-        print(f"   🎨 Banner generation: ON (Gemini 2.5 Flash Image)")
+        print(f"\n   🎨 Banner generation: ON (Gemini 2.5 Flash Image)")
     else:
-        print(f"   🎨 Banner generation: OFF")
+        print(f"\n   🎨 Banner generation: OFF")
 
     enriched_articles: list[dict] = []
     for i, raw in enumerate(candidates, 1):
         print(f"   [{i}/{len(candidates)}] {raw['headline'][:65]}")
-        enriched = enrich_article_with_gpt4o(raw, openai_client)
+        full_text = raw.get("full_text", "")
+        enriched = enrich_article_with_gpt4o(raw, openai_client, full_text=full_text)
         if enriched:
             slug = ensure_unique_slug(enriched["slug_base"], existing_slugs)
             enriched["slug"] = slug

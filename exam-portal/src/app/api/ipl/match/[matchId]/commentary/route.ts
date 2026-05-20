@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { CB_BASE, cbFetchWithRetry } from "@/lib/cricbuzz";
 
-// Cache for 30s on the Vercel edge — multiple users on the commentary page
-// all share the same cached response; only 1 upstream Cricbuzz call per 30s.
 export const revalidate = 30;
 const CACHE_TTL = 30;
 
@@ -15,13 +13,29 @@ type CommItem = {
   ballnbr?: number;
 };
 
+type GroupedOver = {
+  overNum: number;
+  overSummary: string;
+  inningsId: number;
+  balls: CommItem[];
+  runs?: number;
+  wickets?: number;
+};
+
+/**
+ * Match commentary endpoint.
+ *
+ * Returns two data shapes:
+ *  - `comwrapper`: flat list (backward-compatible with existing UI)
+ *  - `groupedByOver`: balls grouped into overs with over header + summary
+ *    Use this for the "Over X: X/Y — commentary" style display.
+ */
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ matchId: string }> }
 ) {
   const { matchId } = await params;
   try {
-    // Fetch latest ball-by-ball + over summaries in parallel (2 calls total)
     const [commRes, oversRes] = await Promise.all([
       cbFetchWithRetry(`${CB_BASE}/mcenter/v1/${matchId}/comm`, { cache: "no-store" }),
       cbFetchWithRetry(`${CB_BASE}/mcenter/v1/${matchId}/overs`, { cache: "no-store" }),
@@ -32,16 +46,14 @@ export async function GET(
       oversRes.ok ? oversRes.json() : null,
     ]);
 
-    // Extract recent ball-by-ball commentary (comwrapper, newest-first)
+    // ── Flat ball-by-ball list (newest first) ─────────────────────────────
     const comwrapper: { commentary?: CommItem }[] = commData?.comwrapper ?? [];
     const recentBalls: CommItem[] = comwrapper
       .map((w) => w.commentary)
       .filter((c): c is CommItem => !!c && (c.overnum ?? 0) > 0);
 
-    // Build a set of overs already covered by ball-by-ball
     const recentOvers = new Set(recentBalls.map((b) => Math.floor(b.overnum ?? 0)));
 
-    // Over summaries from /overs for older overs not in recent balls
     const oversepList: {
       overnum?: number;
       inningsid?: number;
@@ -53,25 +65,67 @@ export async function GET(
       timestamp?: number;
     }[] = oversData?.overseplist?.oversep ?? [];
 
+    // Build over-summary lookup for quick access when grouping
+    const overSummaryMap = new Map<string, { summary: string; runs: number; wickets: number }>();
+    for (const ov of oversepList) {
+      const key = `${ov.inningsid}-${Math.floor(ov.overnum ?? 0)}`;
+      overSummaryMap.set(key, {
+        summary: ov.oversummary?.trim() ?? "",
+        runs:    ov.runs ?? 0,
+        wickets: ov.wickets ?? 0,
+      });
+    }
+
     const overSummaryItems: CommItem[] = oversepList
       .filter((ov) => {
         const ovInt = Math.floor(ov.overnum ?? 0);
         return ovInt > 0 && !recentOvers.has(ovInt);
       })
       .map((ov) => ({
-        overnum: ov.overnum,
+        overnum:   ov.overnum,
         inningsid: ov.inningsid,
         timestamp: ov.timestamp,
-        commtxt: `Over ${Math.floor(ov.overnum ?? 0)} — ${ov.battingteamname ?? ""}: ${ov.runs ?? 0} runs${ov.oversummary ? ` (${ov.oversummary.trim()})` : ""}`,
+        commtxt:   `Over ${Math.floor(ov.overnum ?? 0)} — ${ov.battingteamname ?? ""}: ${ov.runs ?? 0} runs${ov.oversummary ? ` (${ov.oversummary.trim()})` : ""}`,
         eventtype: "over-summary",
       }));
 
-    // Merge: recent balls (newest-first) + over summaries for older overs
     const allItems = [...recentBalls, ...overSummaryItems];
     const mergedComwrapper = allItems.map((c) => ({ commentary: c }));
 
+    // ── Grouped-by-over structure ─────────────────────────────────────────
+    // Group only real ball-by-ball items (not the over-summary placeholders)
+    const groupedMap = new Map<string, GroupedOver>();
+
+    for (const ball of recentBalls) {
+      const overNum   = Math.floor(ball.overnum ?? 0);
+      const inningsId = ball.inningsid ?? 1;
+      const key       = `${inningsId}-${overNum}`;
+
+      if (!groupedMap.has(key)) {
+        const ovData = overSummaryMap.get(key);
+        groupedMap.set(key, {
+          overNum,
+          inningsId,
+          overSummary: ovData?.summary ?? "",
+          runs:        ovData?.runs,
+          wickets:     ovData?.wickets,
+          balls:       [],
+        });
+      }
+      groupedMap.get(key)!.balls.push(ball);
+    }
+
+    // Sort overs: highest first (most recent first)
+    const groupedByOver = Array.from(groupedMap.values()).sort(
+      (a, b) => b.overNum - a.overNum || b.inningsId - a.inningsId
+    );
+
     return NextResponse.json(
-      { comwrapper: mergedComwrapper, miniscore: commData?.miniscore ?? null },
+      {
+        comwrapper: mergedComwrapper,
+        groupedByOver,
+        miniscore: commData?.miniscore ?? null,
+      },
       {
         headers: {
           "Cache-Control": `public, s-maxage=${CACHE_TTL}, stale-while-revalidate=${CACHE_TTL / 2}`,

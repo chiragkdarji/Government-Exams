@@ -7,6 +7,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export const revalidate = 3600;
 
+const BASE_URL = "https://rizzjobs.in";
+
 const IPL_TEAM_SLUGS = [
   "mumbai-indians",
   "chennai-super-kings",
@@ -21,22 +23,23 @@ const IPL_TEAM_SLUGS = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://rizzjobs.in";
-
-  // --- Exam / Jobs section ---
+  // ─── Job / Exam section ───────────────────────────────────────────────────
   let notificationUrls: MetadataRoute.Sitemap = [];
   try {
     const { data } = await supabase
       .from("notifications")
-      .select("id, slug, created_at, updated_at");
+      .select("id, slug, created_at, updated_at")
+      .eq("is_active", true);
     if (data) {
       notificationUrls = data.map((n) => ({
-        url: `${baseUrl}/exam/${n.slug || n.id}`,
+        url: `${BASE_URL}/exam/${n.slug || n.id}`,
         lastModified: new Date(n.updated_at || n.created_at),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
       }));
     }
   } catch (error) {
-    console.error("Error fetching notifications for sitemap:", error);
+    console.error("Sitemap: failed to fetch notifications", error);
   }
 
   let categoryUrls: MetadataRoute.Sitemap = [];
@@ -48,77 +51,103 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .order("sort_order");
     if (data) {
       categoryUrls = data.map((c) => ({
-        url: `${baseUrl}/jobs/${c.slug}`,
+        url: `${BASE_URL}/jobs/${c.slug}`,
         lastModified: new Date(c.updated_at || Date.now()),
+        changeFrequency: "daily" as const,
+        priority: 0.7,
       }));
     }
   } catch (error) {
-    console.error("Error fetching categories for sitemap:", error);
+    console.error("Sitemap: failed to fetch categories", error);
   }
 
-  // --- Cricket / IPL section ---
+  // ─── Cricket / IPL section ────────────────────────────────────────────────
   const cricketStaticUrls: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/cricket`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/live`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/upcoming`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/rankings`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/records`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/news`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/ipl`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/ipl/schedule`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/ipl/points-table`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/ipl/orange-cap`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/ipl/purple-cap`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/ipl/teams`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/ipl/news`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/ipl/stats`, lastModified: new Date() },
-    { url: `${baseUrl}/cricket/ipl/fantasy`, lastModified: new Date() },
+    // Live pages: highest priority + always changing
+    { url: `${BASE_URL}/cricket/live`,               lastModified: new Date(), changeFrequency: "always",  priority: 1.0 },
+    { url: `${BASE_URL}/cricket/ipl`,                lastModified: new Date(), changeFrequency: "hourly",  priority: 1.0 },
+    { url: `${BASE_URL}/cricket/ipl/points-table`,   lastModified: new Date(), changeFrequency: "hourly",  priority: 0.95 },
+    { url: `${BASE_URL}/cricket/ipl/orange-cap`,     lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
+    { url: `${BASE_URL}/cricket/ipl/purple-cap`,     lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
+    { url: `${BASE_URL}/cricket/ipl/schedule`,       lastModified: new Date(), changeFrequency: "daily",   priority: 0.85 },
+    { url: `${BASE_URL}/cricket/ipl/news`,           lastModified: new Date(), changeFrequency: "hourly",  priority: 0.85 },
+    { url: `${BASE_URL}/cricket/ipl/teams`,          lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${BASE_URL}/cricket/ipl/stats`,          lastModified: new Date(), changeFrequency: "daily",   priority: 0.8 },
+    { url: `${BASE_URL}/cricket/ipl/fantasy`,        lastModified: new Date(), changeFrequency: "daily",   priority: 0.75 },
+    { url: `${BASE_URL}/cricket`,                    lastModified: new Date(), changeFrequency: "hourly",  priority: 0.9 },
+    { url: `${BASE_URL}/cricket/upcoming`,           lastModified: new Date(), changeFrequency: "daily",   priority: 0.8 },
+    { url: `${BASE_URL}/cricket/rankings`,           lastModified: new Date(), changeFrequency: "weekly",  priority: 0.75 },
+    { url: `${BASE_URL}/cricket/records`,            lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/cricket/news`,               lastModified: new Date(), changeFrequency: "hourly",  priority: 0.85 },
     ...IPL_TEAM_SLUGS.map((slug) => ({
-      url: `${baseUrl}/cricket/ipl/teams/${slug}`,
+      url: `${BASE_URL}/cricket/ipl/teams/${slug}`,
       lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.75,
     })),
   ];
 
-  // --- News section ---
+  // ─── News section ─────────────────────────────────────────────────────────
   const newsStaticUrls: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/news`, lastModified: new Date() },
-    { url: `${baseUrl}/news/finance`, lastModified: new Date() },
-    { url: `${baseUrl}/news/business`, lastModified: new Date() },
-    { url: `${baseUrl}/news/markets`, lastModified: new Date() },
-    { url: `${baseUrl}/news/economy`, lastModified: new Date() },
-    { url: `${baseUrl}/news/startups`, lastModified: new Date() },
+    { url: `${BASE_URL}/news`,            lastModified: new Date(), changeFrequency: "hourly", priority: 0.9 },
+    { url: `${BASE_URL}/news/finance`,    lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
+    { url: `${BASE_URL}/news/business`,   lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
+    { url: `${BASE_URL}/news/markets`,    lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
+    { url: `${BASE_URL}/news/economy`,    lastModified: new Date(), changeFrequency: "daily",  priority: 0.8 },
+    { url: `${BASE_URL}/news/startups`,   lastModified: new Date(), changeFrequency: "daily",  priority: 0.8 },
   ];
 
+  // Paginate news articles — no 500-item cap, fetch all in batches
   let newsArticleUrls: MetadataRoute.Sitemap = [];
   try {
-    const { data } = await supabase
-      .from("news_articles")
-      .select("slug, published_at, updated_at")
-      .eq("is_published", true)
-      .order("published_at", { ascending: false })
-      .limit(500);
-    if (data) {
-      newsArticleUrls = data.map((a) => ({
-        url: `${baseUrl}/news/${a.slug}`,
-        lastModified: new Date(a.updated_at || a.published_at),
-      }));
+    let offset = 0;
+    const batchSize = 1000;
+    while (true) {
+      const { data } = await supabase
+        .from("news_articles")
+        .select("slug, published_at, updated_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .range(offset, offset + batchSize - 1);
+
+      if (!data || data.length === 0) break;
+
+      for (const a of data) {
+        const age = Date.now() - new Date(a.published_at).getTime();
+        const oneDayMs = 86_400_000;
+        newsArticleUrls.push({
+          url: `${BASE_URL}/news/${a.slug}`,
+          lastModified: new Date(a.updated_at || a.published_at),
+          // Recent articles change more often (corrections, updates)
+          changeFrequency: age < oneDayMs ? ("hourly" as const) : ("weekly" as const),
+          priority: age < oneDayMs ? 0.9 : 0.7,
+        });
+      }
+
+      if (data.length < batchSize) break;
+      offset += batchSize;
     }
   } catch (error) {
-    console.error("Error fetching news articles for sitemap:", error);
+    console.error("Sitemap: failed to fetch news articles", error);
   }
 
-  // --- Legal / static pages ---
+  // ─── Hub / jobs listing ───────────────────────────────────────────────────
+  const hubUrls: MetadataRoute.Sitemap = [
+    { url: BASE_URL,           lastModified: new Date(), changeFrequency: "daily",  priority: 1.0 },
+    { url: `${BASE_URL}/jobs`, lastModified: new Date(), changeFrequency: "daily",  priority: 0.9 },
+  ];
+
+  // ─── Legal / static pages ────────────────────────────────────────────────
   const legalUrls: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/about`, lastModified: new Date("2026-01-01") },
-    { url: `${baseUrl}/contact`, lastModified: new Date("2026-01-01") },
-    { url: `${baseUrl}/privacy`, lastModified: new Date("2026-01-01") },
-    { url: `${baseUrl}/terms`, lastModified: new Date("2026-01-01") },
-    { url: `${baseUrl}/disclaimer`, lastModified: new Date("2026-01-01") },
+    { url: `${BASE_URL}/about`,      lastModified: new Date("2026-01-01"), changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${BASE_URL}/contact`,    lastModified: new Date("2026-01-01"), changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${BASE_URL}/privacy`,    lastModified: new Date("2026-01-01"), changeFrequency: "yearly",  priority: 0.2 },
+    { url: `${BASE_URL}/terms`,      lastModified: new Date("2026-01-01"), changeFrequency: "yearly",  priority: 0.2 },
+    { url: `${BASE_URL}/disclaimer`, lastModified: new Date("2026-01-01"), changeFrequency: "yearly",  priority: 0.2 },
   ];
 
   return [
-    { url: baseUrl, lastModified: new Date() },
-    { url: `${baseUrl}/jobs`, lastModified: new Date() },
+    ...hubUrls,
     ...cricketStaticUrls,
     ...newsStaticUrls,
     ...legalUrls,
