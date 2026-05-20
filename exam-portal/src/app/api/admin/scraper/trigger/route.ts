@@ -13,9 +13,12 @@ import { NextResponse } from "next/server";
  * Falls back to generic webhook (SCRAPER_WEBHOOK_URL + SCRAPER_WEBHOOK_SECRET)
  * if GitHub env vars are not set — for custom server setups.
  */
-export async function POST() {
+export async function POST(req: Request) {
   try {
     await requireAdmin();
+
+    const { searchParams } = new URL(req.url);
+    const scrapeLimit = Math.min(Number(searchParams.get("limit") ?? "0"), 200).toString();
 
     const githubOwner = process.env.GITHUB_OWNER;
     const githubRepo = process.env.GITHUB_REPO;
@@ -34,7 +37,7 @@ export async function POST() {
           "X-GitHub-Api-Version": "2022-11-28",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ref: "master" }),
+        body: JSON.stringify({ ref: "master", inputs: { scrape_limit: scrapeLimit } }),
       });
 
       if (!response.ok) {
@@ -46,11 +49,11 @@ export async function POST() {
         );
       }
 
-      // GitHub returns 204 No Content on success
+      const limitLabel = scrapeLimit === "0" ? "all" : scrapeLimit;
       return NextResponse.json({
         success: true,
         status: "triggered",
-        message: "Scraper workflow dispatched via GitHub Actions.",
+        message: `Scraper workflow dispatched (limit: ${limitLabel} notifications).`,
       });
     }
 

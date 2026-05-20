@@ -16,13 +16,14 @@ export default function ScraperPage() {
   const [scrape, setScrape]   = useState<ActionState>(idle);
   const [refill, setRefill]   = useState<ActionState>(idle);
   const [news, setNews]       = useState<ActionState>(idle);
+  const [scrapeLimit, setScrapeLimit] = useState(0);
   const [refillLimit, setRefillLimit] = useState(30);
   const [newsLimit, setNewsLimit]     = useState(10);
 
   const handleTrigger = async () => {
     setScrape({ running: true, error: null, success: null });
     try {
-      const res  = await fetch("/api/admin/scraper/trigger", { method: "POST" });
+      const res  = await fetch(`/api/admin/scraper/trigger?limit=${scrapeLimit}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         setScrape({ running: false, error: data.error || "Failed to trigger scraper", success: null });
@@ -100,6 +101,27 @@ export default function ScraperPage() {
           ))}
         </ol>
 
+        <div>
+          <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2">
+            Notifications to research
+          </label>
+          <div className="flex gap-2">
+            {[0, 10, 25, 50].map((n) => (
+              <button
+                key={n}
+                onClick={() => setScrapeLimit(n)}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                  scrapeLimit === n
+                    ? "bg-indigo-600 text-white border border-indigo-500"
+                    : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
+                }`}
+              >
+                {n === 0 ? "All" : n}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {scrape.error && (
           <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-2">
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -119,7 +141,7 @@ export default function ScraperPage() {
           className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Play className="w-4 h-4" />
-          {scrape.running ? "Triggering…" : "Run Full Scrape"}
+          {scrape.running ? "Triggering…" : scrapeLimit === 0 ? "Run Full Scrape" : `Run Full Scrape (${scrapeLimit})`}
         </button>
       </div>
 

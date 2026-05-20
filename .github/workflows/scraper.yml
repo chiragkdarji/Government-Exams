@@ -16,6 +16,11 @@ on:
         options:
           - scrape
           - refill
+      scrape_limit:
+        description: 'Max notifications to deep-research (0 = all)'
+        required: false
+        default: '0'
+        type: string
       refill_limit:
         description: 'Number of notifications to refill (refill mode only)'
         required: false
@@ -52,5 +57,5 @@ jobs:
           if [ "${{ github.event.inputs.mode }}" = "refill" ]; then
             python main.py --refill --refill-limit ${{ github.event.inputs.refill_limit || '30' }}
           else
-            python main.py
+            python main.py --limit ${{ github.event.inputs.scrape_limit || '0' }}
           fi
