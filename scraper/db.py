@@ -413,9 +413,11 @@ def _log_run(total: int, new_c: int, updated_c: int,
         print(f"    Payload (sans entries): {json.dumps(safe)}")
 
 
-def upsert_notifications(notifications):
+def upsert_notifications(notifications, max_new: int = 0):
     """
     Inserts or updates notifications in the database.
+    - max_new > 0: stop adding NEW entries once this many have been collected
+      (updates to existing entries are not capped).
     - New entries are checked for pg_trgm near-duplicates before insert.
       If a near-duplicate is found, the entry is merged into the existing record
       (using that record's slug) instead of creating a new slug.
@@ -476,7 +478,11 @@ def upsert_notifications(notifications):
                     pass
 
         if slug not in existing_by_slug:
-            # Genuinely new notification — insert as-is
+            # Genuinely new notification — insert as-is (honour max_new cap)
+            if max_new > 0 and len(new_entries) >= max_new:
+                print(f"  🎯 Reached target of {max_new} new entries — skipping remaining.")
+                skipped_count += 1
+                continue
             final_list.append(n)
             new_entries.append({"title": n["title"], "slug": slug, "link": n.get("link", "")})
         else:

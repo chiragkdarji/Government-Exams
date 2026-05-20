@@ -365,8 +365,11 @@ async def run_automation(dry_run: bool = False, limit: int = 0):
 
     titles = list(consolidated.keys())
     if limit:
-        titles = titles[:limit]
-        print(f"\n🔢 Processing {len(titles)} of {len(consolidated)} titles (--limit={limit})")
+        # Research up to 6× the target so we can find `limit` genuinely new entries
+        # even when most titles are already in the DB from a recent run.
+        research_cap = min(len(titles), limit * 6)
+        titles = titles[:research_cap]
+        print(f"\n🔢 Targeting {limit} new entries — researching up to {research_cap} titles...")
     else:
         print(f"\n🔍 Found {len(consolidated)} unique titles — starting parallel deep synthesis...")
 
@@ -493,7 +496,7 @@ async def run_automation(dry_run: bool = False, limit: int = 0):
         return
 
     print(f"\n📦 Syncing {len(final_list)} notifications to DB...")
-    upsert_notifications(final_list)
+    upsert_notifications(final_list, max_new=limit)
 
 
 # ─── Refill Mode ─────────────────────────────────────────────────────────────
