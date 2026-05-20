@@ -389,6 +389,30 @@ def find_db_duplicate_by_title(title: str, threshold: float = 0.45) -> dict | No
         return None
 
 
+def _log_run(total: int, new_c: int, updated_c: int,
+             new_entries: list, updated_entries: list,
+             status: str = "completed", error_message: str | None = None) -> None:
+    """Insert a row to scraper_runs. Prints the actual error on failure (never silent)."""
+    row: dict = {
+        "scraper_type": "jobs",
+        "total_synced": total,
+        "new_count": new_c,
+        "updated_count": updated_c,
+        "new_entries": new_entries,
+        "updated_entries": updated_entries,
+        "status": status,
+    }
+    if error_message is not None:
+        row["error_message"] = error_message
+    try:
+        supabase.table("scraper_runs").insert(row).execute()
+        print(f"📋 Run logged: {new_c} new, {updated_c} updated (status={status}).")
+    except Exception as e:
+        print(f"⚠️  scraper_runs INSERT FAILED: {e}")
+        safe = {k: v for k, v in row.items() if k not in ("new_entries", "updated_entries")}
+        print(f"    Payload (sans entries): {json.dumps(safe)}")
+
+
 def upsert_notifications(notifications):
     """
     Inserts or updates notifications in the database.
@@ -399,6 +423,7 @@ def upsert_notifications(notifications):
     - The scraper log records the actual field-level changes made.
     """
     if not notifications:
+        _log_run(0, 0, 0, [], [], "completed")
         return
 
     # Deduplicate locally by slug
@@ -471,18 +496,7 @@ def upsert_notifications(notifications):
 
     if not final_list:
         print(f"ℹ️  Nothing to write ({skipped_count} entries already up to date).")
-        try:
-            supabase.table("scraper_runs").insert({
-                "scraper_type": "jobs",
-                "total_synced": len(deduped_list),
-                "new_count": 0,
-                "updated_count": 0,
-                "new_entries": [],
-                "updated_entries": [],
-                "status": "completed",
-            }).execute()
-        except Exception:
-            pass
+        _log_run(len(deduped_list), 0, 0, [], [])
         return []
 
     try:
@@ -494,37 +508,13 @@ def upsert_notifications(notifications):
         ).execute()
         print("✅ Successfully synced to database.")
 
-        # Log this scraper run
-        try:
-            supabase.table("scraper_runs").insert({
-                "scraper_type": "jobs",
-                "total_synced": len(deduped_list),
-                "new_count": len(new_entries),
-                "updated_count": len(updated_entries),
-                "new_entries": new_entries,
-                "updated_entries": updated_entries,
-                "status": "completed",
-            }).execute()
-            print(f"📋 Run logged: {len(new_entries)} new, {len(updated_entries)} updated, {skipped_count} unchanged.")
-        except Exception as log_err:
-            print(f"⚠️  Could not write scraper run log: {log_err}")
+        _log_run(len(deduped_list), len(new_entries), len(updated_entries),
+                 new_entries, updated_entries)
 
         return response.data
 
     except Exception as e:
-        try:
-            supabase.table("scraper_runs").insert({
-                "scraper_type": "jobs",
-                "total_synced": 0,
-                "new_count": 0,
-                "updated_count": 0,
-                "new_entries": [],
-                "updated_entries": [],
-                "status": "failed",
-                "error_message": str(e)[:500],
-            }).execute()
-        except Exception:
-            pass
+        _log_run(0, 0, 0, [], [], status="failed", error_message=str(e)[:500])
         print(f"❌ Error upserting to DB: {e}")
         raise e
 
