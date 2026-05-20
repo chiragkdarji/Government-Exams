@@ -472,6 +472,7 @@ def upsert_notifications(notifications):
         print(f"ℹ️  Nothing to write ({skipped_count} entries already up to date).")
         try:
             supabase.table("scraper_runs").insert({
+                "scraper_type": "jobs",
                 "total_synced": len(deduped_list),
                 "new_count": 0,
                 "updated_count": 0,
@@ -495,6 +496,7 @@ def upsert_notifications(notifications):
         # Log this scraper run
         try:
             supabase.table("scraper_runs").insert({
+                "scraper_type": "jobs",
                 "total_synced": len(deduped_list),
                 "new_count": len(new_entries),
                 "updated_count": len(updated_entries),
@@ -511,6 +513,7 @@ def upsert_notifications(notifications):
     except Exception as e:
         try:
             supabase.table("scraper_runs").insert({
+                "scraper_type": "jobs",
                 "total_synced": 0,
                 "new_count": 0,
                 "updated_count": 0,

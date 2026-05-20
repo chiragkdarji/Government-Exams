@@ -19,6 +19,7 @@ interface ScraperRunEntry {
 interface ScraperRun {
   id: string;
   run_at: string;
+  scraper_type?: "jobs" | "news";
   total_synced: number;
   new_count: number;
   updated_count: number;
@@ -31,6 +32,11 @@ interface ScraperRun {
 function RunCard({ run }: { run: ScraperRun }) {
   const [showNew, setShowNew] = useState(false);
   const [showUpdated, setShowUpdated] = useState(false);
+
+  const isNews = run.scraper_type === "news";
+  const entryPath = (slug: string) => isNews ? `/news/${slug}` : `/exam/${slug}`;
+  const typeLabel = isNews ? "News" : "Jobs";
+  const typeColor = isNews ? "#10b981" : "#6366f1";
 
   const runDate = new Date(run.run_at).toLocaleString("en-IN", {
     timeZone: "Asia/Kolkata",
@@ -52,7 +58,15 @@ function RunCard({ run }: { run: ScraperRun }) {
             <XCircle className="w-5 h-5 text-red-400 shrink-0" />
           )}
           <div>
-            <p className="text-sm font-bold text-white">{runDate} IST</p>
+            <div className="flex items-center gap-2 mb-0.5">
+              <p className="text-sm font-bold text-white">{runDate} IST</p>
+              <span
+                className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: `${typeColor}20`, color: typeColor, border: `1px solid ${typeColor}40` }}
+              >
+                {typeLabel}
+              </span>
+            </div>
             {run.status === "failed" && run.error_message && (
               <p className="text-xs text-red-400 mt-0.5 font-mono">{run.error_message}</p>
             )}
@@ -82,7 +96,7 @@ function RunCard({ run }: { run: ScraperRun }) {
             className="flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 transition-colors font-medium"
           >
             <Plus className="w-3.5 h-3.5" />
-            {run.new_count} new job{run.new_count !== 1 ? "s" : ""} posted
+            {run.new_count} new {isNews ? "article" : "job"}{run.new_count !== 1 ? "s" : ""} posted
             {showNew ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
           {showNew && (
@@ -92,7 +106,7 @@ function RunCard({ run }: { run: ScraperRun }) {
                   <span className="text-emerald-500/50 mt-0.5">•</span>
                   <div className="min-w-0">
                     <a
-                      href={`/exam/${e.slug}`}
+                      href={entryPath(e.slug)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-medium hover:text-white transition-colors"
@@ -123,7 +137,7 @@ function RunCard({ run }: { run: ScraperRun }) {
               {run.updated_entries.map((e, i) => (
                 <div key={i} className="text-xs">
                   <a
-                    href={`/exam/${e.slug}`}
+                    href={entryPath(e.slug)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-300 font-medium hover:text-white transition-colors"

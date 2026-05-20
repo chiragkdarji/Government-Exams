@@ -691,6 +691,30 @@ def process_image_to_webp(image_url: str, slug: str, supabase: Client) -> str | 
         return None
 
 
+# ── Scraper Run Logging ───────────────────────────────────────────────────────
+def log_scraper_run(
+    supabase: Client,
+    new_entries: list[dict],
+    status: str = "completed",
+    error_message: str | None = None,
+) -> None:
+    """Write a row to scraper_runs so the admin logs page shows news runs."""
+    try:
+        supabase.table("scraper_runs").insert({
+            "scraper_type": "news",
+            "total_synced": len(new_entries),
+            "new_count": len(new_entries),
+            "updated_count": 0,
+            "new_entries": new_entries,
+            "updated_entries": [],
+            "status": status,
+            "error_message": error_message,
+        }).execute()
+        print(f"📋 Run logged: {len(new_entries)} news articles upserted.")
+    except Exception as log_err:
+        print(f"⚠️  Could not write news scraper run log: {log_err}")
+
+
 # ── Database Upsert ───────────────────────────────────────────────────────────
 def upsert_articles(articles: list[dict], supabase: Client) -> int:
     """Upsert enriched articles to news_articles table. Returns count inserted."""
@@ -880,12 +904,22 @@ def main():
 
             enriched_articles.append(enriched)
 
-    # 7. Upsert to Supabase
+    # 7. Upsert to Supabase + log the run
     if enriched_articles:
         count = upsert_articles(enriched_articles, supabase)
         print(f"\n✅  Done: {count}/{len(enriched_articles)} articles upserted to news_articles")
+        log_entries = [
+            {
+                "title": a["headline"],
+                "slug": a["slug"],
+                "link": f"https://rizzjobs.in/news/{a['slug']}",
+            }
+            for a in enriched_articles
+        ]
+        log_scraper_run(supabase, log_entries)
     else:
         print("\n✅  Done: no new articles to insert")
+        log_scraper_run(supabase, [])
 
 
 if __name__ == "__main__":
