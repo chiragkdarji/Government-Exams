@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase-server";
+import { createServiceRoleClient } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,8 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    const supabase = getSupabase();
-    // Increment view_count — gracefully handles column not existing (returns error, we ignore)
+    const supabase = createServiceRoleClient();
     await supabase.rpc("increment_news_view", { article_slug: slug }).maybeSingle();
 
     return NextResponse.json({ ok: true });
